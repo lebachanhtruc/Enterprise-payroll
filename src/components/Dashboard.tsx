@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock, Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, PieChart as PieChartIcon, DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock, Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { 
   ComposedChart, 
   Bar, 
