@@ -10,7 +10,7 @@ var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
 var app = express();
 app.use(express.json());
-var PORT = process.env.PORT || 3e3;
+var PORT = parseInt(process.env.PORT || "3000", 10);
 var aiClient = null;
 function getGeminiClient() {
   if (!aiClient) {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock, Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock, Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { 
   ComposedChart, 
   Bar, 
@@ -20,9 +20,18 @@ import { Skeleton } from './ui/Skeleton';
 import { useTour } from '../contexts/TourContext';
 
 export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'checking', isLoadingEmployees, setActiveTab, employees = [], timesheets = {}, isLocked = false, settings }: { stats: any, results: PayrollResult[], pastMetrics?: any, dbStatus?: 'stable' | 'disconnected' | 'checking', isLoadingEmployees?: boolean, setActiveTab?: any, employees?: any[], timesheets?: any, isLocked?: boolean, settings?: any }) {
+    const [isAnomalyExpanded, setIsAnomalyExpanded] = useState(true);
     
     const { startTour } = useTour();
     const avgGross = results.length ? results.reduce((acc, r) => acc + r.grossEarnings, 0) / results.length : 0;
+    const avgHrs = results.length ? results.reduce((acc, r) => acc + r.totalHrs, 0) / results.length : 0;
+    const avgAddons = results.length ? results.reduce((acc, r) => acc + r.totalTips, 0) / results.length : 0;
+    const anomalies = results.map(r => {
+        let isHighHrs = r.totalHrs > (avgHrs * 1.5) && r.totalHrs > 40;
+        let isHighAddons = r.totalTips > (avgAddons * 2) && r.totalTips > 200;
+        return { ...r, isHighHrs, isHighAddons };
+    }).filter(r => r.isHighHrs || r.isHighAddons).sort((a,b) => b.totalHrs - a.totalHrs).slice(0, 5);
+
 
     const chartData = results.map(r => {
         const basePay = Math.max(0, r.grossEarnings - r.totalTips);
@@ -150,13 +159,13 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
                     <p className="text-sm text-slate-500">Overview of current cycle performance.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('input')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed' : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'}`}>
+                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('input')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'}`}>
                         <Calculator size={16} /> Process Timesheets
                     </button>
-                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('reports')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}`}>
+                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('reports')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}`}>
                         <CheckCircle2 size={16} /> Confirm Payroll
                     </button>
-                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('employees')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
+                    <button onClick={() => !isLocked && setActiveTab && setActiveTab('employees')} disabled={isLocked} className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border transition-colors ${isLocked ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
                         <UserPlus size={16} /> Add Staff
                     </button>
                     <button onClick={() => setActiveTab && setActiveTab('reports')} className="flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 transition-colors">
@@ -281,11 +290,11 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
                     {stats.gross > 0 && (
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 font-bold text-slate-800 text-sm flex items-center gap-2">
-                                <PieChart size={16} className="text-sky-500" /> Cost Breakdown
+                                <PieChartIcon size={16} className="text-sky-500" /> Cost Breakdown
                             </div>
                             <div className="p-6 flex items-center justify-center h-[220px]">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
+                                    <RechartsPieChart>
                                         <Pie
                                             data={[
                                                 { name: 'Base Pay', value: stats.gross - stats.addons },
@@ -302,7 +311,7 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
                                             <Cell fill="#d97706" />
                                         </Pie>
                                         <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                                    </PieChart>
+                                    </RechartsPieChart>
                                 </ResponsiveContainer>
                             </div>
                             <div className="px-6 pb-6 flex justify-center gap-4 text-xs font-bold">
@@ -315,41 +324,44 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
                     {/* Anomaly Watchlist */}
                     {results.length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 font-bold text-slate-800 text-sm flex items-center gap-2">
-                                <Eye size={16} className="text-rose-500" /> Anomaly Watchlist
-                            </div>
-                            <div className="p-0">
-                                <table className="w-full text-left text-sm whitespace-nowrap">
-                                    <thead className="bg-slate-50/50 text-[10px] uppercase text-slate-400">
-                                        <tr>
-                                            <th className="px-4 py-2 font-bold">Employee</th>
-                                            <th className="px-4 py-2 font-bold text-right">Reason</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {results.filter(r => r.totalHrs > 45 || r.totalTips > 500).sort((a,b) => b.totalHrs - a.totalHrs).slice(0, 5).map(r => (
-                                            <tr key={r.id} className="hover:bg-slate-50">
-                                                <td className="px-4 py-3">
-                                                    <div className="font-bold text-slate-800">{r.nickname}</div>
-                                                    <div className="text-[10px] text-slate-500">{r.totalHrs > 45 ? `${r.totalHrs} hrs` : formatCurrency(r.totalTips)}</div>
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <span className={`text-[10px] font-bold px-2 py-1 rounded ${r.totalHrs > 45 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}`}>
-                                                        {r.totalHrs > 45 ? 'High Hours' : 'High Add-ons'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {results.filter(r => r.totalHrs > 45 || r.totalTips > 500).length === 0 && (
+                            <button onClick={() => setIsAnomalyExpanded(!isAnomalyExpanded)} className="w-full bg-slate-50 px-5 py-3 border-b border-slate-100 font-bold text-slate-800 text-sm flex items-center justify-between hover:bg-slate-100 transition-colors">
+                                <div className="flex items-center gap-2"><Eye size={16} className="text-rose-500" /> Anomaly Watchlist</div>
+                                {isAnomalyExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                            </button>
+                            {isAnomalyExpanded && (
+                                <div className="p-0">
+                                    <table className="w-full text-left text-sm whitespace-nowrap">
+                                        <thead className="bg-slate-50/50 text-[10px] uppercase text-slate-400">
                                             <tr>
-                                                <td colSpan={2} className="px-4 py-8 text-center text-slate-400 font-medium text-sm">
-                                                    No anomalies detected.
-                                                </td>
+                                                <th className="px-4 py-1.5 font-bold">Employee</th>
+                                                <th className="px-4 py-1.5 font-bold text-right">Reason</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {anomalies.map(r => (
+                                                <tr key={r.id} className="hover:bg-slate-50">
+                                                    <td className="px-4 py-2">
+                                                        <div className="font-bold text-slate-800">{r.nickname}</div>
+                                                        <div className="text-[10px] text-slate-500">{r.isHighHrs ? `${r.totalHrs} hrs` : formatCurrency(r.totalTips)}</div>
+                                                    </td>
+                                                    <td className="px-4 py-2 text-right">
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${r.isHighHrs ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}`}>
+                                                            {r.isHighHrs ? 'High Hours' : 'High Add-ons'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {anomalies.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={2} className="px-4 py-6 text-center text-slate-400 font-medium text-sm">
+                                                        No anomalies detected.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     )}
 

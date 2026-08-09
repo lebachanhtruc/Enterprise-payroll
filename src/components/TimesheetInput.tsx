@@ -169,7 +169,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
         </div>
       </div>
 
-      <div className="hidden lg:block overflow-x-auto w-full relative">
+      <div className="hidden md:block overflow-x-auto w-full relative">
         <table className="w-full text-left min-w-[850px] table-fixed">
           <thead>
             <tr className="bg-slate-900 text-white">
@@ -303,7 +303,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
       </div>
 
       {/* MOBILE CARD VIEW */}
-      <div className="block lg:hidden bg-slate-50/50 min-h-[500px]">
+      <div className="block md:hidden bg-slate-50/50 min-h-[500px]">
         {paginatedEmployees.length === 0 ? (
             <div className="text-center py-12 text-slate-500 font-semibold">
               <div className="flex flex-col items-center justify-center">
@@ -366,7 +366,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
 
       {/* MOBILE BOTTOM SHEET FOR DATA ENTRY */}
       {selectedMobileEmpId && (
-        <div className="fixed inset-0 z-[9999] lg:hidden flex flex-col justify-end">
+        <div className="fixed inset-0 z-[9999] md:hidden flex flex-col justify-end">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedMobileEmpId(null)} />
             
             <div className="relative bg-white w-full rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-full duration-300">

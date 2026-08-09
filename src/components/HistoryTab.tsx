@@ -118,7 +118,7 @@ export default function HistoryTab({ employees, settings, isDemoUser }: { employ
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {logs.map((log) => {
-                                    const isLock = log.session_id === 'SYSTEM_LOCK' || log.action_type === 'Payroll cycle locked / confirmed';
+                                    const isLock = (log as any).session_id === 'SYSTEM_LOCK' || log.action_type === 'Payroll cycle locked / confirmed';
                                     let actionBadgeClass = 'bg-slate-100 text-slate-600';
                                     if (isLock) actionBadgeClass = 'bg-amber-100 text-amber-800 border border-amber-200';
                                     else if (log.action_type === 'Validation' || log.action_type === 'Update') actionBadgeClass = 'bg-indigo-50 text-indigo-700 border border-indigo-100';
