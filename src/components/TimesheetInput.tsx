@@ -22,8 +22,10 @@ interface TimesheetInputProps {
 }
 
 export default function TimesheetInput({ employees, timesheets, onTimeChange, setTimesheets, settings, setAnomalies, setShowAnomaliesModal, setViewLogsConfig, hasUnsavedChanges, setHasUnsavedChanges, isLoadingEmployees, isLocked }: TimesheetInputProps) {
-  const { showToast, showConfirm } = useUI();
+  const { showToast, showConfirm, isCompactMode } = useUI();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [selectedMobileEmpId, setSelectedMobileEmpId] = useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -167,23 +169,23 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
         </div>
       </div>
 
-      <div className="overflow-x-auto w-full relative">
+      <div className="hidden lg:block overflow-x-auto w-full relative">
         <table className="w-full text-left min-w-[850px] table-fixed">
           <thead>
             <tr className="bg-slate-900 text-white">
-              <th className="px-3 md:px-6 py-3 md:py-4 w-28 md:w-48 sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.15)] align-middle" rowSpan={2}>Employee</th>
-              <th className="px-4 py-2 text-center bg-indigo-800 border-l border-slate-700" colSpan={3}>Week 1</th>
-              <th className="px-4 py-2 text-center bg-teal-800 border-l border-slate-700" colSpan={3}>Week 2</th>
-              <th className="px-4 py-2 text-center bg-amber-700 border-l border-slate-700">Previous Debt</th>
+              <th className={`${isCompactMode ? 'px-2 py-1' : 'px-3 md:px-6 py-3 md:py-4'} w-28 md:w-48 sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.15)] align-middle`} rowSpan={2}>Employee</th>
+              <th className={`${isCompactMode ? 'px-2 py-1' : 'px-4 py-2'} text-center bg-indigo-800 border-l border-slate-700`} colSpan={3}>Week 1</th>
+              <th className={`${isCompactMode ? 'px-2 py-1' : 'px-4 py-2'} text-center bg-teal-800 border-l border-slate-700`} colSpan={3}>Week 2</th>
+              <th className={`${isCompactMode ? 'px-2 py-1' : 'px-4 py-2'} text-center bg-amber-700 border-l border-slate-700`}>Previous Debt</th>
             </tr>
-            <tr className="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 bg-slate-900">
-              <th className="px-2 py-2 text-center bg-indigo-900/50 border-l border-slate-800">Hours</th>
-              <th className="px-2 py-2 text-center bg-indigo-900/50">Cash Addon</th>
-              <th className="px-2 py-2 text-center bg-indigo-900/50">Card Addon</th>
-              <th className="px-2 py-2 text-center bg-teal-900/50 border-l border-slate-800">Hours</th>
-              <th className="px-2 py-2 text-center bg-teal-900/50">Cash Addon</th>
-              <th className="px-2 py-2 text-center bg-teal-900/50">Card Addon</th>
-              <th className="px-2 py-2 text-center bg-amber-900/50 border-l border-slate-800">Prev Debt</th>
+            <tr className={`${isCompactMode ? 'text-[9px]' : 'text-[10px]'} uppercase font-bold text-slate-400 border-b border-slate-800 bg-slate-900`}>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-indigo-900/50 border-l border-slate-800`}>Hours</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-indigo-900/50`}>Cash Addon</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-indigo-900/50`}>Card Addon</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-teal-900/50 border-l border-slate-800`}>Hours</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-teal-900/50`}>Cash Addon</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-teal-900/50`}>Card Addon</th>
+              <th className={`${isCompactMode ? 'px-1 py-1' : 'px-2 py-2'} text-center bg-amber-900/50 border-l border-slate-800`}>Prev Debt</th>
             </tr>
           </thead>
           <tbody>
@@ -251,7 +253,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
                                 }
                             }}
                             className={cn(
-                                "w-full min-w-[60px] p-2 border rounded outline-none text-right font-mono focus:border-indigo-500 transition-colors", 
+                                `w-full min-w-[60px] ${isCompactMode ? 'p-1 text-sm' : 'p-2'} border rounded outline-none text-right font-mono focus:border-indigo-500 transition-colors`, 
                                 bg, 
                                 inputDisabled && "opacity-50 cursor-not-allowed",
                                 hasError && !inputDisabled && "border-rose-500 bg-rose-50 text-rose-700 animate-pulse focus:border-rose-600"
@@ -262,7 +264,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
 
                 return (
                   <tr key={emp.id} className="border-b border-slate-200 bg-white hover:bg-slate-50 transition-colors">
-                    <td className="px-3 md:px-6 py-3 md:py-4 border-r border-slate-200 sticky left-0 z-10 bg-white drop-shadow-md shadow-[2px_0_5px_rgba(0,0,0,0.05)] align-top">
+                    <td className={`${isCompactMode ? 'px-2 py-1' : 'px-3 md:px-6 py-3 md:py-4'} border-r border-slate-200 sticky left-0 z-10 bg-white drop-shadow-md shadow-[2px_0_5px_rgba(0,0,0,0.05)] align-top`}>
                       <div className="font-bold text-slate-900 text-sm md:text-base truncate max-w-[80px] md:max-w-none">{emp.nickname}</div>
                       {isFixed && (
                           <div className="mt-1 flex flex-wrap items-center gap-1 md:gap-2">
@@ -285,13 +287,13 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
                           );
                       })()}
                     </td>
-                    <td className="p-2 border-r border-slate-100 bg-indigo-50/10">{renderInput('w1H', 'bg-white font-bold', isLockedFixed)}</td>
-                    <td className="p-2 border-r border-slate-100 bg-indigo-50/10">{renderInput('w1C', 'bg-emerald-50 border-emerald-100 text-emerald-800', isLockedFixed)}</td>
-                    <td className="p-2 border-r border-slate-100 bg-indigo-50/10">{renderInput('w1K', 'bg-indigo-50 border-indigo-100 text-indigo-800', isLockedFixed)}</td>
-                    <td className="p-2 border-r border-slate-100 bg-teal-50/10">{renderInput('w2H', 'bg-white font-bold', isLockedFixed)}</td>
-                    <td className="p-2 border-r border-slate-100 bg-teal-50/10">{renderInput('w2C', 'bg-emerald-50 border-emerald-100 text-emerald-800', isLockedFixed)}</td>
-                    <td className="p-2 border-r border-slate-100 bg-teal-50/10">{renderInput('w2K', 'bg-slate-50 border-slate-200 text-slate-800', isLockedFixed)}</td>
-                    <td className="p-2 bg-amber-50/20">{renderInput('prevDebt', 'bg-rose-50 border-rose-200 text-rose-700 font-bold', false)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-indigo-50/10`}>{renderInput('w1H', 'bg-white font-bold', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-indigo-50/10`}>{renderInput('w1C', 'bg-emerald-50 border-emerald-100 text-emerald-800', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-indigo-50/10`}>{renderInput('w1K', 'bg-indigo-50 border-indigo-100 text-indigo-800', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-teal-50/10`}>{renderInput('w2H', 'bg-white font-bold', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-teal-50/10`}>{renderInput('w2C', 'bg-emerald-50 border-emerald-100 text-emerald-800', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} border-r border-slate-100 bg-teal-50/10`}>{renderInput('w2K', 'bg-slate-50 border-slate-200 text-slate-800', isLockedFixed)}</td>
+                    <td className={`${isCompactMode ? 'p-1' : 'p-2'} bg-amber-50/20`}>{renderInput('prevDebt', 'bg-rose-50 border-rose-200 text-rose-700 font-bold', false)}</td>
                   </tr>
                 );
               })
@@ -299,6 +301,195 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
           </tbody>
         </table>
       </div>
+
+      {/* MOBILE CARD VIEW */}
+      <div className="block lg:hidden bg-slate-50/50 min-h-[500px]">
+        {paginatedEmployees.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 font-semibold">
+              <div className="flex flex-col items-center justify-center">
+                <Search size={32} className="text-slate-300 mb-2" />
+                <p>No employees found matching "{searchTerm}"</p>
+              </div>
+            </div>
+        ) : (
+            <div className="flex flex-col gap-3 p-4">
+              {paginatedEmployees.map((emp: Employee) => {
+                const ts = timesheets[emp.id] || { w1H: '', w1C: '', w1K: '', w2H: '', w2C: '', w2K: '', prevDebt: '' };
+                const isFixed = emp.rule.type === 'FIXED_TOTAL';
+                const isUnlocked = !!ts.isUnlocked;
+                
+                return (
+                  <div 
+                    key={emp.id} 
+                    onClick={() => !isLocked && setSelectedMobileEmpId(emp.id)}
+                    className={cn(
+                      "bg-white border rounded-2xl p-4 shadow-sm transition-all active:scale-95 cursor-pointer",
+                      isLocked ? "opacity-75 cursor-not-allowed border-slate-200" : "border-slate-200 hover:border-indigo-300"
+                    )}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-bold text-slate-900 text-lg">{emp.nickname}</div>
+                        <div className="text-xs text-slate-500">{emp.taxName}</div>
+                      </div>
+                      {isFixed && (
+                          <div className={cn("text-[10px] font-bold px-2 py-1 rounded-lg border uppercase", isUnlocked ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600')}>
+                              {isUnlocked ? 'Edit Mode' : 'Fixed'}
+                          </div>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 mt-4 bg-slate-50 rounded-xl p-3">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-indigo-500 uppercase">W1 Hours</span>
+                        <span className="font-mono font-bold text-slate-800">{ts.w1H || '-'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-teal-500 uppercase">W2 Hours</span>
+                        <span className="font-mono font-bold text-slate-800">{ts.w2H || '-'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase">Total Cash</span>
+                        <span className="font-mono font-bold text-slate-800">{Number(ts.w1C || 0) + Number(ts.w2C || 0) > 0 ? (Number(ts.w1C || 0) + Number(ts.w2C || 0)) : '-'}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-rose-500 uppercase">Debt</span>
+                        <span className="font-mono font-bold text-slate-800">{ts.prevDebt || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+        )}
+      </div>
+
+      {/* MOBILE BOTTOM SHEET FOR DATA ENTRY */}
+      {selectedMobileEmpId && (
+        <div className="fixed inset-0 z-[9999] lg:hidden flex flex-col justify-end">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedMobileEmpId(null)} />
+            
+            <div className="relative bg-white w-full rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-full duration-300">
+                <div className="w-full flex justify-center pt-3 pb-1" onClick={() => setSelectedMobileEmpId(null)}>
+                    <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
+                </div>
+                
+                {(() => {
+                    const emp = employees.find(e => e.id === selectedMobileEmpId);
+                    if (!emp) return null;
+                    const ts = timesheets[emp.id] || { w1H: '', w1C: '', w1K: '', w2H: '', w2C: '', w2K: '', prevDebt: '' };
+                    const isFixed = emp.rule.type === 'FIXED_TOTAL';
+                    const isUnlocked = !!ts.isUnlocked;
+                    const isLockedFixed = isFixed && !isUnlocked;
+                    
+                    const renderMobileInput = (field: string, label: string, colorClass: string) => {
+                        let displayValue = (ts as any)[field];
+                        const inputDisabled = isLocked || isLockedFixed;
+                        if (isLockedFixed) {
+                            displayValue = field.includes('C') ? '' : (field.includes('H') ? emp.rule.fixedHrs : emp.rule.fixedTip);
+                        } else if (emp.rule.type === 'GUARANTEED_MIN_HOURS' && field.includes('H')) {
+                            const minHrs = emp.rule.guaranteedBaseHrs || 0;
+                            const actualHrs = parseFloat(displayValue);
+                            if (isNaN(actualHrs) || actualHrs < minHrs) {
+                                displayValue = minHrs;
+                            }
+                        }
+
+                        return (
+                            <div className="flex flex-col">
+                                <label className={cn("text-[10px] font-bold uppercase mb-1", colorClass)}>{label}</label>
+                                <input 
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    inputMode="decimal"
+                                    disabled={inputDisabled}
+                                    value={displayValue}
+                                    onChange={e => onTimeChange(emp.id, field, e.target.value)}
+                                    className={cn(
+                                        "w-full bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xl font-bold focus:border-indigo-500 focus:bg-white outline-none transition-colors",
+                                        inputDisabled && "opacity-50 cursor-not-allowed text-slate-400 bg-slate-100"
+                                    )}
+                                    placeholder="0"
+                                />
+                            </div>
+                        );
+                    };
+
+                    const currentIndex = filteredEmployees.findIndex(e => e.id === selectedMobileEmpId);
+                    
+                    const handlePrev = () => {
+                        if (currentIndex > 0) {
+                            setSelectedMobileEmpId(filteredEmployees[currentIndex - 1].id);
+                        }
+                    };
+
+                    const handleNext = () => {
+                        if (currentIndex < filteredEmployees.length - 1) {
+                            setSelectedMobileEmpId(filteredEmployees[currentIndex + 1].id);
+                        }
+                    };
+
+                    return (
+                        <div className="p-5 overflow-y-auto hide-scrollbar">
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900 leading-tight">{emp.nickname}</h3>
+                                    <p className="text-sm text-slate-500 mt-1">{emp.taxName}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={handlePrev} disabled={currentIndex <= 0} className="p-3 bg-slate-100 rounded-full text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors">
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                    <button onClick={handleNext} disabled={currentIndex >= filteredEmployees.length - 1} className="p-3 bg-slate-100 rounded-full text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors">
+                                        <ChevronRight size={24} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 pb-6">
+                                {/* W1 */}
+                                <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50 space-y-4">
+                                    <h4 className="font-bold text-indigo-900 border-b border-indigo-100 pb-2">Week 1</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {renderMobileInput('w1H', 'Hours', 'text-indigo-600')}
+                                        <div className="space-y-4">
+                                            {renderMobileInput('w1C', 'Cash Addon', 'text-emerald-600')}
+                                            {renderMobileInput('w1K', 'Card Addon', 'text-indigo-600')}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* W2 */}
+                                <div className="bg-teal-50/50 p-4 rounded-2xl border border-teal-100/50 space-y-4">
+                                    <h4 className="font-bold text-teal-900 border-b border-teal-100 pb-2">Week 2</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {renderMobileInput('w2H', 'Hours', 'text-teal-600')}
+                                        <div className="space-y-4">
+                                            {renderMobileInput('w2C', 'Cash Addon', 'text-emerald-600')}
+                                            {renderMobileInput('w2K', 'Card Addon', 'text-teal-600')}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Debt */}
+                                <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100/50">
+                                    {renderMobileInput('prevDebt', 'Previous Debt', 'text-rose-600')}
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onClick={() => setSelectedMobileEmpId(null)}
+                                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg sticky bottom-4 shadow-xl active:scale-95 transition-transform"
+                            >
+                                Done
+                            </button>
+                        </div>
+                    );
+                })()}
+            </div>
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="flex justify-between items-center bg-slate-50 px-6 py-4 border-t border-slate-100">

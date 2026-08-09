@@ -11,7 +11,7 @@ import { exportPayrollToCSV } from '../lib/csv-export';
 import { Skeleton } from './ui/Skeleton';
 
 export default function Reports({ results, settings, employees, timesheets, isLoadingEmployees, isLocked, setIsLocked }: { results: PayrollResult[], settings: SystemSettings, employees: Employee[], timesheets: Record<number, Timesheet>, isLoadingEmployees?: boolean, isLocked?: boolean, setIsLocked?: (val: boolean) => void }) {
-    const { showToast, showConfirm } = useUI();
+    const { showToast, showConfirm, isCompactMode } = useUI();
     const { role } = useAuth();
     const isSaveDisabled = role === 'MANAGER' || role === 'STAFF';
     const [reportType, setReportType] = useState('CHECK');
@@ -199,11 +199,12 @@ export default function Reports({ results, settings, employees, timesheets, isLo
     };
 
     const renderTableBody = (filteredResults: PayrollResult[], columns: { label: string, render: (r: PayrollResult) => React.ReactNode, right?: boolean }[]) => (
-        <div className="overflow-x-auto w-full"><table className="w-full text-left mt-8 min-w-[650px]">
+        <>
+        <div className="hidden md:block overflow-x-auto w-full"><table className="w-full text-left mt-8 min-w-[650px]">
             <thead>
-                <tr className="text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-900">
-                    <th className="py-3 px-2">Name / EMP ID</th>
-                    {columns.map((c, i) => <th key={i} className={`py-3 px-2 ${c.right ? 'text-right' : ''}`}>{c.label}</th>)}
+                <tr className={`text-[10px] uppercase font-black text-slate-400 border-b-2 border-slate-900 ${isCompactMode ? '' : ''}`}>
+                    <th className={`${isCompactMode ? 'py-1 px-2' : 'py-3 px-2'}`}>Name / EMP ID</th>
+                    {columns.map((c, i) => <th key={i} className={`${isCompactMode ? 'py-1 px-2' : 'py-3 px-2'} ${c.right ? 'text-right' : ''}`}>{c.label}</th>)}
                 </tr>
             </thead>
             <tbody>
@@ -211,12 +212,12 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                     <>
                         {[1, 2, 3].map(i => (
                             <tr key={`sk-${i}`} className="border-b border-slate-100">
-                                <td className="py-4 px-2">
+                                <td className={`${isCompactMode ? 'py-2 px-2' : 'py-4 px-2'}`}>
                                     <Skeleton className="h-6 w-48 mb-1" />
                                     <Skeleton className="h-4 w-24" />
                                 </td>
                                 {columns.map((_, colIdx) => (
-                                    <td key={colIdx} className="py-4 px-2">
+                                    <td key={colIdx} className={`${isCompactMode ? 'py-2 px-2' : 'py-4 px-2'}`}>
                                         <Skeleton className="h-6 w-24 ml-auto" />
                                     </td>
                                 ))}
@@ -226,16 +227,49 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                 ) : (
                     filteredResults.map(r => (
                         <tr key={r.id} className="border-b border-slate-100">
-                            <td className="py-4 px-2">
-                                <div className="font-black text-lg text-slate-900">{r.taxName}</div>
-                                <div className="text-xs text-slate-500 font-mono">{r.sin || 'No SIN'}</div>
+                            <td className={`${isCompactMode ? 'py-2 px-2' : 'py-4 px-2'}`}>
+                                <div className={`font-black text-slate-900 ${isCompactMode ? 'text-base' : 'text-lg'}`}>{r.taxName}</div>
+                                <div className={`text-slate-500 font-mono ${isCompactMode ? 'text-[10px]' : 'text-xs'}`}>{r.sin || 'No SIN'}</div>
                             </td>
-                            {columns.map((c, i) => <td key={i} className={`py-4 px-2 ${c.right ? 'text-right font-black text-xl' : ''}`}>{c.render(r)}</td>)}
+                            {columns.map((c, i) => <td key={i} className={`${isCompactMode ? 'py-2 px-2 text-sm' : 'py-4 px-2'} ${c.right ? `text-right font-black ${isCompactMode ? 'text-base' : 'text-xl'}` : ''}`}>{c.render(r)}</td>)}
                         </tr>
                     ))
                 )}
             </tbody>
         </table></div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4 mt-6">
+            {isLoadingEmployees && results.length === 0 ? (
+                <>
+                    {[1, 2, 3].map(i => (
+                        <div key={`sk-mobile-${i}`} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <Skeleton className="h-6 w-48 mb-2" />
+                            <Skeleton className="h-4 w-24 mb-4" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    ))}
+                </>
+            ) : (
+                filteredResults.map(r => (
+                    <div key={r.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-3">
+                        <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-black text-slate-900 text-lg leading-tight">{r.taxName}</h4>
+                            <p className="text-slate-500 font-mono text-xs mt-1">{r.sin || 'No SIN'}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {columns.map((c, i) => (
+                                <div key={i} className={`flex flex-col gap-1 bg-slate-50 p-3 rounded-xl border border-slate-100 ${columns.length % 2 !== 0 && i === columns.length - 1 ? 'col-span-2' : ''}`}>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase">{c.label}</span>
+                                    <div className={`font-black ${c.right ? 'text-indigo-700 text-lg' : 'text-slate-800 text-base'}`}>{c.render(r)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+        </>
     );
 
     return (

@@ -29,7 +29,7 @@ import Sidebar, { NavItem } from './components/Sidebar';
 
 function AppContent() {
   const { session, role, companyId, signOut } = useAuth();
-  const { showToast, showConfirm } = useUI();
+  const { showToast, showConfirm, isCompactMode } = useUI();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -227,7 +227,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className={`flex flex-col h-screen overflow-hidden ${isCompactMode ? 'compact-mode' : ''}`}>
       {isDemoUser && (
         <div className="bg-emerald-600 text-emerald-50 text-center py-2 px-4 text-xs sm:text-sm font-medium z-[60] shadow-sm border-b border-emerald-700 w-full shrink-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
           <span>👋 Welcome to the Lime Payroll Interactive Demo! You are viewing a temporary demo workspace.</span>

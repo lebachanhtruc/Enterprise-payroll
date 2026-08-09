@@ -19,12 +19,15 @@ interface ConfirmConfig {
 interface UIContextType {
   showToast: (message: string, type?: ToastType) => void;
   showConfirm: (title: string, message: string) => Promise<boolean>;
+  isCompactMode: boolean;
+  setIsCompactMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export function UIProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isCompactMode, setIsCompactMode] = useState<boolean>(false);
   const [confirmState, setConfirmState] = useState<ConfirmConfig>({
     isOpen: false,
     title: '',
@@ -82,7 +85,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <UIContext.Provider value={{ showToast, showConfirm }}>
+    <UIContext.Provider value={{ showToast, showConfirm, isCompactMode, setIsCompactMode }}>
       {children}
 
       {/* Toast Notifications Container */}

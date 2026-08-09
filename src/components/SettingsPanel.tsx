@@ -46,7 +46,8 @@ const ROLE_PRIORITY: Record<string, number> = { 'OWNER': 3, 'MANAGER': 2, 'FINAN
 
 export default function SettingsPanel({ settings, setSettings, setActiveTab }: SettingsPanelProps) {
     const { user, role, session } = useAuth();
-    const { showToast, showConfirm } = useUI();
+    const { showToast, showConfirm, isCompactMode, setIsCompactMode } = useUI();
+    const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'access' | 'rules'>('general');
     const [isTestRunnerOpen, setIsTestRunnerOpen] = useState(false);
     
     // Workspace Users state
@@ -436,12 +437,55 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
             <h3 className="text-2xl font-black text-slate-900 mb-8 border-b pb-4 flex items-center gap-3">
                 <Settings className="text-slate-400" /> System Configuration
             </h3>
+            {/* TABS NAVIGATION */}
+            <div className="flex space-x-1 border-b border-slate-200 mb-8 overflow-x-auto hide-scrollbar pb-px">
+                <button
+                    onClick={() => setActiveSettingsTab('general')}
+                    className={`px-4 py-3 font-bold text-sm whitespace-nowrap transition-colors ${activeSettingsTab === 'general' ? 'border-b-2 border-indigo-600 text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    General
+                </button>
+                <button
+                    onClick={() => setActiveSettingsTab('access')}
+                    className={`px-4 py-3 font-bold text-sm whitespace-nowrap transition-colors ${activeSettingsTab === 'access' ? 'border-b-2 border-indigo-600 text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    Access Control
+                </button>
+                <button
+                    onClick={() => setActiveSettingsTab('rules')}
+                    className={`px-4 py-3 font-bold text-sm whitespace-nowrap transition-colors ${activeSettingsTab === 'rules' ? 'border-b-2 border-indigo-600 text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    Rule Library
+                </button>
+            </div>
             <div className="space-y-6">
+                {/* GENERAL TAB */}
+                {activeSettingsTab === 'general' && (
+                    <div className="space-y-6 animate-in fade-in duration-200">
                 <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Current Workspace</label>
                     <div className="w-full p-4 border border-slate-200 rounded-xl bg-slate-50 font-bold text-lg text-slate-800 shadow-inner">
                         {settings.companyName || 'Loading Workspace...'}
                     </div>
+
+                        {/* COMPACT MODE TOGGLE */}
+                        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-indigo-200 transition-colors mt-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Compact UI Mode</h4>
+                                    <p className="text-sm text-slate-500">Reduce padding and font sizes to fit more data on screen (ideal for large monitors).</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer ml-4">
+                                    <input 
+                                        type="checkbox" 
+                                        className="sr-only peer"
+                                        checked={isCompactMode}
+                                        onChange={() => setIsCompactMode(!isCompactMode)}
+                                    />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -482,6 +526,11 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                     </div>
                 </div>
                 
+                    </div>
+                )}
+                {/* ACCESS CONTROL TAB */}
+                {activeSettingsTab === 'access' && (
+                    <div className="space-y-6 animate-in fade-in duration-200">
                 {/* Workspace Access Control */}
                 <div className="pt-8 border-t border-slate-200">
                     <h4 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -567,6 +616,11 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                     </div>
                 </div>
 
+                    </div>
+                )}
+                {/* RULE LIBRARY TAB */}
+                {activeSettingsTab === 'rules' && (
+                    <div className="space-y-6 animate-in fade-in duration-200">
                 {/* Custom Rule Library */}
                 <div className="pt-8 border-t border-slate-200" data-tour="step-2">
                     <div className="flex justify-between items-center mb-4">
@@ -891,6 +945,8 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                     )}
                 </div>
 
+                    </div>
+                )}
                 <div className="pt-8 flex justify-between gap-4">
                     <button onClick={() => setActiveTab('dashboard')} className="flex-1 p-4 bg-indigo-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-sm" title="Save current system configurations">
                         <Save size={20} /> Save & Continue

@@ -126,7 +126,7 @@ export default function ImportData({ employees, timesheets, settings, pastData, 
                             {format(parseISO(pastData.settings.periodStart), 'dd/MM/yyyy')} - {format(parseISO(pastData.settings.periodEnd), 'dd/MM/yyyy')}
                         </div>
                     </div>
-                    <div className="overflow-x-auto opacity-80 w-full relative">
+                    <div className="hidden lg:block overflow-x-auto opacity-80 w-full relative">
                         <table className="w-full text-left min-w-[850px] table-fixed">
                             <thead>
                                 <tr className="bg-slate-800 text-white">
@@ -171,6 +171,52 @@ export default function ImportData({ employees, timesheets, settings, pastData, 
                                 })}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4 p-4 opacity-90 bg-slate-50">
+                        {pastData.employees.map((emp: Employee) => {
+                            if (emp.rule.type.includes('_IN_')) return null;
+                            const ts = pastData.timesheets[emp.id] || {};
+                            const pr = pastData.payrollData?.find((p: any) => p.id === emp.id);
+                            const tH = pr?.totalHrs || (parseFloat(ts.w1H as string) || 0) + (parseFloat(ts.w2H as string) || 0);
+                            const cF = pr?.carryForwardBalance > 0 ? pr.carryForwardBalance : '';
+                            return (
+                                <div key={emp.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-3">
+                                        <div>
+                                            <h4 className="font-black text-slate-800 text-lg">{emp.nickname}</h4>
+                                            <p className="text-xs text-slate-500">{emp.taxName}</p>
+                                        </div>
+                                        {cF && <span className="bg-rose-100 text-rose-700 font-bold px-2 py-1 rounded text-xs border border-rose-200">Debt: ${Number(cF).toFixed(2)}</span>}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50">
+                                            <div className="text-[10px] font-bold text-indigo-800 uppercase mb-2">Week 1</div>
+                                            <div className="flex justify-between text-sm mb-1"><span className="text-slate-500">Hours</span><span className="font-bold">{ts.w1H || '-'}</span></div>
+                                            <div className="flex justify-between text-sm mb-1"><span className="text-slate-500">Cash</span><span className="font-bold text-indigo-600">{ts.w1C ? `$${ts.w1C}` : '-'}</span></div>
+                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Card</span><span className="font-bold text-indigo-600">{ts.w1K ? `$${ts.w1K}` : '-'}</span></div>
+                                        </div>
+                                        <div className="bg-teal-50/50 p-3 rounded-lg border border-teal-100/50">
+                                            <div className="text-[10px] font-bold text-teal-800 uppercase mb-2">Week 2</div>
+                                            <div className="flex justify-between text-sm mb-1"><span className="text-slate-500">Hours</span><span className="font-bold">{ts.w2H || '-'}</span></div>
+                                            <div className="flex justify-between text-sm mb-1"><span className="text-slate-500">Cash</span><span className="font-bold text-teal-600">{ts.w2C ? `$${ts.w2C}` : '-'}</span></div>
+                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Card</span><span className="font-bold text-teal-600">{ts.w2K ? `$${ts.w2K}` : '-'}</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-amber-50 rounded-lg p-3 border border-amber-100 flex justify-between items-center">
+                                        <div>
+                                            <div className="text-[10px] font-bold text-amber-800 uppercase">Total Hours</div>
+                                            <div className="font-black text-amber-700">{tH > 0 ? tH : '-'}</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-bold text-amber-800 uppercase">Total Addons</div>
+                                            <div className="font-black text-amber-700">{pr?.totalTips ? `$${pr.totalTips}` : '-'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
