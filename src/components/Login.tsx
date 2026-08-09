@@ -42,7 +42,7 @@ export default function Login({ isHydratingDemo }: { isHydratingDemo?: boolean }
                 let company_id = null;
                 let attempts = 0;
                 while (attempts < 10) {
-                    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', data.user.id).single();
+                    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', data.user.id).maybeSingle();
                     if (profile?.company_id) {
                         company_id = profile.company_id;
                         break;

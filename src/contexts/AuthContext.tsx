@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .from('profiles')
                 .select('role, company_id')
                 .eq('id', currentUserId)
-                .single();
+                .maybeSingle();
 
             if (error) throw error;
             if (data) {
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     .from('profiles')
                     .select('role, company_id')
                     .eq('id', userId)
-                    .single();
+                    .maybeSingle();
 
                 if (error) throw error;
                 if (mounted && data) {
