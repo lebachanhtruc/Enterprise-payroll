@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Printer, Save } from 'lucide-react';
+import { Printer, Save, Filter } from 'lucide-react';
 import { format, parseISO , addDays } from 'date-fns';
 import { PayrollResult, ValidationLog, SystemSettings, Employee, Timesheet } from '../types';
 import { formatCurrency, formatNumber, cn, handlePrint, hasSessionAnomaly } from '../lib/utils';
@@ -274,38 +274,20 @@ export default function Reports({ results, settings, employees, timesheets, isLo
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200 print-hidden">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full xl:w-auto">
-                    <h3 className="text-xl font-bold text-slate-800 whitespace-nowrap">Reconciliation & Execution</h3>
-                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <select 
-                            className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-indigo-700 outline-none bg-indigo-50 w-full sm:w-auto"
-                            value={reportType} onChange={e => setReportType(e.target.value)}
-                        >
-                            <option value="CHECK">Standard Payroll Report</option>
-                            <option value="CASH_TIP">Other Addons (Flexible Payment)</option>
-                            <option value="CASH_SALARY">Productivity Bonus Policy</option>
-                            <option value="SHORTFALL">Carry-Forward Debt</option>
-                        </select>
-                        {reportType === 'CHECK' && (
-                            <select className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-slate-700 outline-none w-full sm:w-auto" value={reportView} onChange={e => setReportView(e.target.value)}>
-                                <option value="BOTH">Print Both Weeks</option>
-                                <option value="W1">Print only Week 1</option>
-                                <option value="W2">Print only Week 2</option>
-                            </select>
-                        )}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 print-hidden overflow-hidden">
+                {/* Header & Actions Row */}
+                <div className="p-5 border-b border-slate-100 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-slate-50/50">
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-800">Reconciliation & Execution</h3>
+                        <p className="text-sm text-slate-500 mt-1">Review, export, and finalize payroll data</p>
                     </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end">
-                    <button title={isLocked ? "Cycle locked" : "Finalize payroll and save to history"} 
-                        onClick={handleSaveClick} 
-                        disabled={isSaving || isSaveDisabled || isLocked}
-                        className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed whitespace-nowrap flex-1 sm:flex-none"
-                    >
-                        <Save size={18} /> {isSaving ? 'Saving...' : 'Confirm Payroll'}
-                    </button>
                     
-                    <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm flex-1 sm:flex-none">
+                    <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                        <button onClick={() => window.print()} className="bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all flex-1 sm:flex-none shadow-sm">
+                            <Printer size={18} /> Print
+                        </button>
+                        
+                        <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm flex-1 sm:flex-none">
                             <button 
                                 onClick={() => exportPayrollToCSV(results, settings, auditLogs)} 
                                 className="text-white px-4 py-2.5 font-bold flex-1 sm:flex-none flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap" 
@@ -322,10 +304,41 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                                 Excel
                             </button>
                         </div>
-                    
-                    <button onClick={() => window.print()} className="bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all whitespace-nowrap flex-1 sm:flex-none">
-                        <Printer size={18} /> Print
-                    </button>
+                        
+                        <button title={isLocked ? "Cycle locked" : "Finalize payroll and save to history"} 
+                            onClick={handleSaveClick} 
+                            disabled={isSaving || isSaveDisabled || isLocked}
+                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed whitespace-nowrap flex-1 sm:flex-none shadow-sm"
+                        >
+                            <Save size={18} /> {isSaving ? 'Saving...' : 'Confirm Payroll'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Filters Row */}
+                <div className="p-5 flex flex-col md:flex-row items-start md:items-center gap-4 bg-white">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-2">
+                        <Filter size={16} />
+                        Report View
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 w-full">
+                        <select 
+                            className="border-2 border-slate-200 rounded-lg px-4 py-2.5 font-bold text-indigo-700 outline-none bg-indigo-50/50 hover:bg-indigo-50 focus:border-indigo-500 transition-colors w-full sm:w-auto min-w-[240px]"
+                            value={reportType} onChange={e => setReportType(e.target.value)}
+                        >
+                            <option value="CHECK">Standard Payroll Report</option>
+                            <option value="CASH_TIP">Other Addons (Flexible Payment)</option>
+                            <option value="CASH_SALARY">Productivity Bonus Policy</option>
+                            <option value="SHORTFALL">Carry-Forward Debt</option>
+                        </select>
+                        {reportType === 'CHECK' && (
+                            <select className="border-2 border-slate-200 rounded-lg px-4 py-2.5 font-bold text-slate-700 outline-none hover:border-slate-300 focus:border-indigo-500 transition-colors w-full sm:w-auto bg-white" value={reportView} onChange={e => setReportView(e.target.value)}>
+                                <option value="BOTH">Print Both Weeks</option>
+                                <option value="W1">Print only Week 1</option>
+                                <option value="W2">Print only Week 2</option>
+                            </select>
+                        )}
+                    </div>
                 </div>
             </div>
 
