@@ -88,7 +88,7 @@ export default function Login({ isHydratingDemo }: { isHydratingDemo?: boolean }
                 
                 await refreshProfile();
                 showToast('Sandbox seeded successfully', 'success');
-                startTour();
+                startTour('demo');
                 window.location.href = '/';
             }
         } catch (err: any) {

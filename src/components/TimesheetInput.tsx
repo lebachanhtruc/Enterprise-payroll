@@ -121,7 +121,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" data-tour="step-3">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" data-tour="step-3" data-onboard="tour-timesheet">
       <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50">
         <div>
           <h3 className="text-xl font-bold text-slate-800">Timesheet Processing</h3>

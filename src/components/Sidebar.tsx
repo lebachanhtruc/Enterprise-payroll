@@ -1,6 +1,7 @@
 import React from 'react';
-import { Cpu, Lock, LogOut, User } from 'lucide-react';
+import { Cpu, Lock, LogOut, User, Compass } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTour } from '../contexts/TourContext';
 
 export interface NavItem {
     id: string;
@@ -45,6 +46,7 @@ export default function Sidebar({
     setIsMobileMenuOpen
 }: SidebarProps) {
     const visibleNavItems = navItems.filter(item => !(item.hideFor && role && item.hideFor.includes(role)));
+    const { startTour } = useTour();
 
     return (
         <aside className={cn(
@@ -120,7 +122,6 @@ export default function Sidebar({
                     </div>
                 </div>
 
-                {/* Role Switcher for Demo Mode */}
                 {isDemoUser && setRole && (
                     <div className="mb-4 bg-slate-800/30 p-3 rounded-xl border border-indigo-500/30">
                         <label className="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2">Demo Role Switcher</label>
@@ -138,6 +139,16 @@ export default function Sidebar({
                         </select>
                     </div>
                 )}
+
+                <button
+                    onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        startTour('onboarding');
+                    }}
+                    className="w-full mb-2 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left whitespace-nowrap text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 border border-emerald-500/20 bg-emerald-500/5 shadow-sm"
+                >
+                    <Compass size={18} /> Start Setup Guide
+                </button>
 
                 <button
                     onClick={onSignOut}

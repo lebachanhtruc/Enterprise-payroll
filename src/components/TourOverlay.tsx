@@ -3,7 +3,7 @@ import { useTour } from '../contexts/TourContext';
 import { ChevronRight, ChevronLeft, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const TOUR_STEPS = [
+const DEMO_TOUR_STEPS = [
     {
         step: 0,
         id: 'step-1',
@@ -30,16 +30,40 @@ const TOUR_STEPS = [
     }
 ];
 
+const ONBOARDING_TOUR_STEPS = [
+    {
+        step: 0,
+        id: 'tour-settings',
+        title: 'Step 1: Setup Workspace',
+        content: 'First, set up your workspace name and standard payroll period (e.g., bi-weekly dates) in the System Configuration tab.'
+    },
+    {
+        step: 1,
+        id: 'tour-employees',
+        title: 'Step 2: Add Employees',
+        content: 'Next, add your employees and assign them custom rules (like Waitstaff, Managers) to dictate how their pay is calculated.'
+    },
+    {
+        step: 2,
+        id: 'tour-timesheet',
+        title: 'Step 3: Input Timesheets',
+        content: 'Finally, input their weekly hours and tips. The AI engine will automatically compile everything into a final payroll report.'
+    }
+];
+
 export default function TourOverlay() {
-    const { isActive, currentStep, nextStep, prevStep, endTour } = useTour();
+    const { isActive, currentStep, tourType, nextStep, prevStep, endTour } = useTour();
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
+    const activeSteps = tourType === 'onboarding' ? ONBOARDING_TOUR_STEPS : DEMO_TOUR_STEPS;
+
     useEffect(() => {
-        if (!isActive) return;
+        if (!isActive || !tourType) return;
 
         const updatePosition = () => {
-            const stepData = TOUR_STEPS[currentStep];
-            const el = document.querySelector(`[data-tour="${stepData.id}"]`);
+            const stepData = activeSteps[currentStep];
+            const attr = tourType === 'onboarding' ? 'data-onboard' : 'data-tour';
+            const el = document.querySelector(`[${attr}="${stepData.id}"]`);
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => {
@@ -59,10 +83,12 @@ export default function TourOverlay() {
             window.removeEventListener('resize', updatePosition);
             window.removeEventListener('scroll', updatePosition);
         };
-    }, [isActive, currentStep]);
+    }, [isActive, currentStep, tourType]);
 
-    const stepData = TOUR_STEPS[currentStep];
-    const isLastStep = currentStep === TOUR_STEPS.length - 1;
+    if (!tourType) return null;
+
+    const stepData = activeSteps[currentStep];
+    const isLastStep = currentStep === activeSteps.length - 1;
 
     let popoverStyle: React.CSSProperties = {
         top: '50%',
@@ -146,7 +172,7 @@ export default function TourOverlay() {
                         </button>
 
                         <div className="text-xs font-black text-emerald-600 tracking-wider uppercase">
-                            Step {currentStep + 1} of 4
+                            Step {currentStep + 1} of {activeSteps.length}
                         </div>
                         
                         <h3 className="text-lg font-black text-slate-900">{stepData.title}</h3>

@@ -461,7 +461,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
             <div className="space-y-6">
                 {/* GENERAL TAB */}
                 {activeSettingsTab === 'general' && (
-                    <div className="space-y-6 animate-in fade-in duration-200">
+                    <div className="space-y-6 animate-in fade-in duration-200" data-onboard="tour-settings">
                 <div>
                     <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Current Workspace</label>
                     <div className="w-full p-4 border border-slate-200 rounded-xl bg-slate-50 font-bold text-lg text-slate-800 shadow-inner">

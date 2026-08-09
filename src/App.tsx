@@ -36,16 +36,22 @@ function AppContent() {
   const [dbStatus, setDbStatus] = useState<'stable' | 'disconnected' | 'checking'>('checking');
   const [showDbError, setShowDbError] = useState(false);
 
-  const { isActive, currentStep } = useTour();
+  const { isActive, currentStep, tourType } = useTour();
 
   useEffect(() => {
-    if (isActive) {
-      if (currentStep === 0) setActiveTab('dashboard');
-      else if (currentStep === 1) setActiveTab('settings');
-      else if (currentStep === 2) setActiveTab('input');
-      else if (currentStep === 3) setActiveTab('history');
+    if (isActive && tourType) {
+      if (tourType === 'demo') {
+        if (currentStep === 0) setActiveTab('dashboard');
+        else if (currentStep === 1) setActiveTab('settings');
+        else if (currentStep === 2) setActiveTab('input');
+        else if (currentStep === 3) setActiveTab('history');
+      } else if (tourType === 'onboarding') {
+        if (currentStep === 0) setActiveTab('settings');
+        else if (currentStep === 1) setActiveTab('employees');
+        else if (currentStep === 2) setActiveTab('input');
+      }
     }
-  }, [isActive, currentStep]);
+  }, [isActive, currentStep, tourType]);
 
   useEffect(() => {
     if (!session) return;
