@@ -274,40 +274,41 @@ export default function Reports({ results, settings, employees, timesheets, isLo
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col 2xl:flex-row justify-between items-start 2xl:items-center gap-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200 print-hidden">
-                <div className="flex flex-wrap items-center gap-4">
-                    <h3 className="text-xl font-bold text-slate-800 mr-2">Reconciliation & Execution</h3>
-                    <select 
-                        className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-indigo-700 outline-none bg-indigo-50"
-                        value={reportType} onChange={e => setReportType(e.target.value)}
-                    >
-                        <option value="CHECK">Standard Payroll Report</option>
-                        <option value="CASH_TIP">Other Addons (Flexible Payment)</option>
-                        <option value="CASH_SALARY">Productivity Bonus Policy</option>
-                        <option value="SHORTFALL">Carry-Forward Debt</option>
-                    </select>
-                    {reportType === 'CHECK' && (
-                        <select className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-slate-700 outline-none" value={reportView} onChange={e => setReportView(e.target.value)}>
-                            <option value="BOTH">Print Both Weeks</option>
-                            <option value="W1">Print only Week 1</option>
-                            <option value="W2">Print only Week 2</option>
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200 print-hidden">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full xl:w-auto">
+                    <h3 className="text-xl font-bold text-slate-800 whitespace-nowrap">Reconciliation & Execution</h3>
+                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <select 
+                            className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-indigo-700 outline-none bg-indigo-50 w-full sm:w-auto"
+                            value={reportType} onChange={e => setReportType(e.target.value)}
+                        >
+                            <option value="CHECK">Standard Payroll Report</option>
+                            <option value="CASH_TIP">Other Addons (Flexible Payment)</option>
+                            <option value="CASH_SALARY">Productivity Bonus Policy</option>
+                            <option value="SHORTFALL">Carry-Forward Debt</option>
                         </select>
-                    )}
+                        {reportType === 'CHECK' && (
+                            <select className="border-2 border-slate-200 rounded-lg px-4 py-2 font-bold text-slate-700 outline-none w-full sm:w-auto" value={reportView} onChange={e => setReportView(e.target.value)}>
+                                <option value="BOTH">Print Both Weeks</option>
+                                <option value="W1">Print only Week 1</option>
+                                <option value="W2">Print only Week 2</option>
+                            </select>
+                        )}
+                    </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 w-full 2xl:w-auto">
+                <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end">
                     <button title={isLocked ? "Cycle locked" : "Finalize payroll and save to history"} 
                         onClick={handleSaveClick} 
                         disabled={isSaving || isSaveDisabled || isLocked}
-                        className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed whitespace-nowrap"
+                        className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed whitespace-nowrap flex-1 sm:flex-none"
                     >
                         <Save size={18} /> {isSaving ? 'Saving...' : 'Confirm Payroll'}
                     </button>
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                        <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm w-full sm:w-auto">
+                    <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm flex-1 sm:flex-none">
                             <button 
                                 onClick={() => exportPayrollToCSV(results, settings, auditLogs)} 
-                                className="text-white px-4 py-2.5 font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap w-full sm:w-auto" 
+                                className="text-white px-4 py-2.5 font-bold flex-1 sm:flex-none flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap" 
                                 title="Export to CSV (UTF-8) for external systems"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -315,14 +316,16 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                             </button>
                             <button 
                                 onClick={() => exportPayrollToExcel(results, settings, auditLogs)} 
-                                className="text-emerald-100 px-4 py-2.5 font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap text-sm w-full sm:w-auto" 
+                                className="text-emerald-100 px-4 py-2.5 font-bold flex-1 sm:flex-none flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap text-sm" 
                                 title="Export raw data to Excel"
                             >
                                 Excel
                             </button>
                         </div>
-                        <button onClick={handlePrint} className="bg-slate-100 text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all whitespace-nowrap w-full sm:w-auto" title="Print the current report view"><Printer size={18} /> Print</button>
-                    </div>
+                    
+                    <button onClick={() => window.print()} className="bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all whitespace-nowrap flex-1 sm:flex-none">
+                        <Printer size={18} /> Print
+                    </button>
                 </div>
             </div>
 
