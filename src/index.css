@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Redefining indigo into a premium executive Deep Teal palette */
+  --color-indigo-50: #f0fbfb;
+  --color-indigo-100: #daf5f5;
+  --color-indigo-200: #b9ebeb;
+  --color-indigo-300: #86dbdb;
+  --color-indigo-400: #4ec0c0;
+  --color-indigo-500: #1ca2a2;
+  --color-indigo-600: #0f767e;
+  --color-indigo-700: #0a5d64;
+  --color-indigo-800: #06474c;
+  --color-indigo-900: #033337;
+
+  /* Custom Sidebar Obsidian-Teal styling */
+  --color-sidebar-bg: #081719;
+  --color-sidebar-border: #12292c;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+  
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-block {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .page-break {
+    page-break-after: always;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hide spin buttons in number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
