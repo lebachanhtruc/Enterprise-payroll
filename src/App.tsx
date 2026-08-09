@@ -6,7 +6,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { 
   LayoutDashboard, Users, Calculator, Settings, AlertTriangle,
-  History, Printer, FileJson
+  History, Printer, FileJson, Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO } from 'date-fns';
@@ -31,6 +31,7 @@ function AppContent() {
   const { session, role, companyId, signOut } = useAuth();
   const { showToast, showConfirm } = useUI();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [dbStatus, setDbStatus] = useState<'stable' | 'disconnected' | 'checking'>('checking');
   const [showDbError, setShowDbError] = useState(false);
@@ -228,16 +229,16 @@ function AppContent() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {isDemoUser && (
-        <div className="bg-emerald-600 text-emerald-50 text-center py-2 px-4 text-sm font-medium z-50 shadow-sm border-b border-emerald-700 w-full shrink-0 flex items-center justify-center gap-2">
-          👋 Welcome to the Lime Payroll Interactive Demo! You are viewing a temporary demo workspace.
+        <div className="bg-emerald-600 text-emerald-50 text-center py-2 px-4 text-xs sm:text-sm font-medium z-[60] shadow-sm border-b border-emerald-700 w-full shrink-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+          <span>👋 Welcome to the Lime Payroll Interactive Demo! You are viewing a temporary demo workspace.</span>
           {demoTimeRemaining !== null && (
-            <span className="bg-emerald-700 px-2 py-0.5 rounded text-emerald-100 tabular-nums ml-2 font-bold tracking-widest">
+            <span className="bg-emerald-700 px-2 py-0.5 rounded text-emerald-100 tabular-nums font-bold tracking-widest whitespace-nowrap">
               Demo expires in: {formatTime(demoTimeRemaining)}
             </span>
           )}
         </div>
       )}
-      <div className="flex flex-1 overflow-hidden bg-slate-50 font-sans">
+      <div className="flex flex-1 overflow-hidden bg-slate-50 font-sans relative">
         <AnimatePresence>
         {showDbError && (
           <motion.div 
@@ -261,6 +262,13 @@ function AppContent() {
         )}
       </AnimatePresence>
       
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       <Sidebar 
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -275,15 +283,26 @@ function AppContent() {
         setHasUnsavedChanges={setHasUnsavedChanges}
         showToast={showToast}
         showConfirm={showConfirm}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
       <main className={`flex-1 min-w-0 overflow-auto bg-slate-50 relative print:overflow-visible print:bg-white ${showAnomaliesModal || viewLogsConfig ? 'print-hidden' : ''}`}>
-        <header className="bg-white border-b border-slate-200 px-8 py-6 flex justify-between items-center print-hidden">
-          <div>
-            <h2 className="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-1">{navItems.find(i => i.id === activeTab)?.label}</h2>
-            <div className="text-2xl font-bold text-slate-800 tracking-tight">{settings.companyId ? settings.companyName : "Select a company"}</div>
+        <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-4 md:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center print-hidden gap-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu size={24} />
+            </button>
+            <div>
+              <h2 className="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-1">{navItems.find(i => i.id === activeTab)?.label}</h2>
+              <div className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">{settings.companyId ? settings.companyName : "Select a company"}</div>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 self-end sm:self-auto">
             <div className="text-right bg-slate-50 border border-slate-200 rounded-lg px-4 py-2">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Payroll Period</div>
               <div className="text-sm font-semibold text-slate-800 flex items-center gap-2">

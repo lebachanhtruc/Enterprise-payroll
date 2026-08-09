@@ -23,6 +23,8 @@ interface SidebarProps {
     setHasUnsavedChanges: (val: boolean) => void;
     showToast: (msg: string, type: 'success' | 'error' | 'info') => void;
     showConfirm: (title: string, message: string) => Promise<boolean>;
+    isMobileMenuOpen: boolean;
+    setIsMobileMenuOpen: (val: boolean) => void;
 }
 
 export default function Sidebar({
@@ -38,12 +40,18 @@ export default function Sidebar({
     hasUnsavedChanges,
     setHasUnsavedChanges,
     showToast,
-    showConfirm
+    showConfirm,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen
 }: SidebarProps) {
     const visibleNavItems = navItems.filter(item => !(item.hideFor && role && item.hideFor.includes(role)));
 
     return (
-        <aside className="w-72 bg-sidebar-bg border-r border-sidebar-border text-slate-400 flex flex-col print-hidden">
+        <aside className={cn(
+            "w-72 bg-sidebar-bg border-r border-sidebar-border text-slate-400 flex flex-col print-hidden",
+            "fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 md:relative md:translate-x-0",
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
             <div className="p-6 pb-2">
                 <div className="flex items-center gap-3 mb-1">
                     <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
@@ -73,6 +81,7 @@ export default function Sidebar({
                                     setHasUnsavedChanges(false);
                                 }
                                 setActiveTab(item.id);
+                                setIsMobileMenuOpen(false);
                             }}
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left whitespace-nowrap mb-1",
