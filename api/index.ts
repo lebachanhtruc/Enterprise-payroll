@@ -238,6 +238,12 @@ app.post("/api/seed-sandbox", verifyAuth, async (req: Request, res: Response): P
 });
 
 // Stateless Explicit Cleanup Cron Endpoint
+app.get("/api/debug-env", (req: Request, res: Response): void => {
+  const key = process.env.GEMINI_API_KEY || "";
+  const maskedKey = key.length > 5 ? key.substring(0, 5) + "..." : "missing or too short";
+  res.json({ gemini_key_prefix: maskedKey });
+});
+
 app.post("/api/cron/cleanup-sandbox", async (req: Request, res: Response): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
