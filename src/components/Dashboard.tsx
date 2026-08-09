@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Area,
-  PieChart, Pie, Cell
+  PieChart as RechartsPieChart, Pie, Cell
 } from 'recharts';
 import { PayrollResult } from '../types';
 import { formatCurrency, formatNumber, cn } from '../lib/utils';
