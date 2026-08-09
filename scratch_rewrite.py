@@ -1,149 +1,29 @@
-import React from 'react';
-import { DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock, Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle } from 'lucide-react';
-import { 
-  ComposedChart, 
-  Bar, 
-  Line,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend,
-  ResponsiveContainer,
-  ReferenceLine,
-  Area,
-  PieChart, Pie, Cell
-} from 'recharts';
-import { PayrollResult } from '../types';
-import { formatCurrency, formatNumber, cn } from '../lib/utils';
-import { Skeleton } from './ui/Skeleton';
-import { useTour } from '../contexts/TourContext';
+import re
 
-export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'checking', isLoadingEmployees, setActiveTab, employees = [], timesheets = {}, isLocked = false, settings }: { stats: any, results: PayrollResult[], pastMetrics?: any, dbStatus?: 'stable' | 'disconnected' | 'checking', isLoadingEmployees?: boolean, setActiveTab?: any, employees?: any[], timesheets?: any, isLocked?: boolean, settings?: any }) {
-    
-    const { startTour } = useTour();
-    const avgGross = results.length ? results.reduce((acc, r) => acc + r.grossEarnings, 0) / results.length : 0;
+with open("src/components/Dashboard.tsx", "r") as f:
+    content = f.read()
 
-    const chartData = results.map(r => {
-        const basePay = Math.max(0, r.grossEarnings - r.totalTips);
-        return {
-            name: r.nickname,
-            gross: r.grossEarnings,
-            basePay: basePay,
-            tips: r.totalTips,
-            hrs: r.totalHrs,
-        };
-    }).sort((a, b) => b.gross - a.gross).slice(0, 10);
+# Add new lucide icons
+content = content.replace("from 'lucide-react';", ", Download, UserPlus, PlayCircle, Lock, Unlock, CalendarDays, UserMinus, ChevronRight, Activity, Calculator, Eye, AlertCircle } from 'lucide-react';")
 
-    const getComparison = (current: number, past?: number) => {
-        if (!past) return null;
-        const diff = current - past;
-        const percent = (diff / past) * 100;
-        return { diff, percent, isUp: diff > 0 };
-    };
+# Add new recharts components
+content = content.replace("from 'recharts';", ", PieChart, Pie, Cell } from 'recharts';")
 
-    const grossComp = getComparison(stats.gross, pastMetrics?.gross);
-    const hrsComp = getComparison(stats.hrs, pastMetrics?.hrs);
-    const addonsComp = getComparison(stats.addons, pastMetrics?.addons);
+# Update Dashboard signature
+old_sig = "export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'checking', isLoadingEmployees }: { stats: any, results: PayrollResult[], pastMetrics?: any, dbStatus?: 'stable' | 'disconnected' | 'checking', isLoadingEmployees?: boolean }) {"
+new_sig = "export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'checking', isLoadingEmployees, setActiveTab, employees = [], timesheets = {}, isLocked = false, settings }: { stats: any, results: PayrollResult[], pastMetrics?: any, dbStatus?: 'stable' | 'disconnected' | 'checking', isLoadingEmployees?: boolean, setActiveTab?: any, employees?: any[], timesheets?: any, isLocked?: boolean, settings?: any }) {"
+content = content.replace(old_sig, new_sig)
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-100">
-                    <p className="font-bold text-slate-800 mb-2">{label}</p>
-                    {payload.map((entry: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2 text-sm text-slate-600 mb-1">
-                            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }} />
-                            <span className="font-medium">{entry.name}:</span>
-                            <span className="font-bold text-slate-900">
-                                {entry.name === 'Total Hours' ? `${entry.value}h` : formatCurrency(entry.value)}
-                            </span>
-                        </div>
-                    ))}
-                    <div className="mt-2 pt-2 border-t border-slate-100 text-sm font-bold text-slate-900">
-                        Total Gross: {formatCurrency(payload.find((p: any) => p.dataKey === 'basePay')?.payload.gross || 0)}
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    };
+# We need to replace the return block starting from `return (\n        <div className="space-y-6" data-tour="step-1">`
+# to the end of the Dashboard component (before `function Card`).
+# Let's find it.
 
-    if (isLoadingEmployees && results.length === 0) {
-        return (
-            <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                            <div className="w-1/2">
-                                <Skeleton className="h-4 w-2/3 mb-2" />
-                                <Skeleton className="h-8 w-full" />
-                            </div>
-                            <Skeleton className="w-14 h-14 rounded-xl" />
-                        </div>
-                    ))}
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <div className="flex justify-between items-center mb-6">
-                        <Skeleton className="h-6 w-1/3" />
-                    </div>
-                    <Skeleton className="h-[400px] w-full" />
-                </div>
-            </div>
-        );
-    }
+split_str = '        <div className="space-y-6" data-tour="step-1">'
+parts = content.split(split_str)
+header_part = parts[0]
+footer_part = parts[1].split('function Card')[1]
 
-    if (results.length === 0) {
-        return (
-            <div className="space-y-6 max-w-4xl mx-auto py-10" data-tour="step-1">
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 className="text-2xl font-black text-slate-900">Welcome to Lime Payroll</h2>
-                        <p className="text-slate-500 mt-1">Let's get your first payroll cycle running.</p>
-                    </div>
-                    <button onClick={() => startTour('onboarding')} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold rounded-xl transition-colors shadow-sm">
-                        <Play size={18} /> Play Interactive Guide
-                    </button>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500"></div>
-                    <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-6">
-                        <Compass size={40} />
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-4">Start Your Setup Journey</h3>
-                    <p className="text-slate-500 text-lg mb-10 max-w-lg mx-auto">
-                        Your dashboard is empty because there are no timesheets or employees configured yet. Follow these three simple steps to unlock the magic of AI payroll.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left relative before:absolute before:top-1/2 before:left-10 before:right-10 before:h-0.5 before:-translate-y-1/2 before:bg-slate-100 before:hidden md:before:block before:z-0">
-                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
-                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">1</div>
-                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><Settings size={18} className="text-indigo-500" /> Company Settings</h4>
-                            <p className="text-sm text-slate-500">Set up your workspace name and standard payroll bi-weekly dates.</p>
-                        </div>
-                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
-                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">2</div>
-                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><Users size={18} className="text-sky-500" /> Add Staff & Rules</h4>
-                            <p className="text-sm text-slate-500">Add employees and assign them AI rules to dictate their pay calculations.</p>
-                        </div>
-                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
-                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">3</div>
-                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><CalendarClock size={18} className="text-emerald-500" /> Input Timesheets</h4>
-                            <p className="text-sm text-slate-500">Log weekly hours and tips, then let the engine compile your payroll instantly.</p>
-                        </div>
-                    </div>
-
-                    <button onClick={() => startTour('onboarding')} className="mt-12 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-lg shadow-lg shadow-indigo-600/30 transition-transform hover:-translate-y-1 flex items-center gap-2 mx-auto">
-                        <Play fill="currentColor" size={20} /> Start Setup Guide Now
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-6" data-tour="step-1">
+new_render = """        <div className="space-y-6" data-tour="step-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-4">
                 <div>
                     <h2 className="text-xl font-bold text-slate-900">Payroll Dashboard</h2>
@@ -359,28 +239,9 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
     );
 }
 
-function Card({ title, value, icon: Icon, color, comp }: { title: string, value: string, icon: LucideIcon, color: string, comp?: any }) {
-    const bgColor = {
-        lime: 'bg-lime-50 text-lime-600',
-        indigo: 'bg-indigo-50 text-indigo-600',
-        teal: 'bg-teal-50 text-teal-600',
-    }[color] || 'bg-slate-50 text-slate-600';
-    return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-            <div>
-                <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">{title}</div>
-                <div className="text-3xl font-black text-slate-900 flex items-center gap-2">
-                    {value}
-                    {comp && (
-                        <span className={cn("text-sm font-bold px-2 py-0.5 rounded ml-2", comp.isUp ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                            {comp.isUp ? '↑' : '↓'} {Math.abs(comp.percent).toFixed(1)}%
-                        </span>
-                    )}
-                </div>
-            </div>
-            <div className={cn("w-14 h-14 rounded-xl flex items-center justify-center", bgColor)}>
-                <Icon size={28} />
-            </div>
-        </div>
-    );
-}
+function Card"""
+
+final_content = header_part + new_render + "function Card" + footer_part
+
+with open("src/components/Dashboard.tsx", "w") as f:
+    f.write(final_content)

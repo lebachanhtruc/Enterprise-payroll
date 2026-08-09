@@ -328,7 +328,7 @@ function AppContent() {
         <div className="p-4 md:p-8 w-full max-w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              {activeTab === 'dashboard' && <Dashboard stats={stats} results={payrollResults} pastMetrics={pastMetrics} dbStatus={dbStatus} isLoadingEmployees={isLoadingEmployees} />}
+              {activeTab === 'dashboard' && <Dashboard stats={stats} results={payrollResults} pastMetrics={pastMetrics} dbStatus={dbStatus} isLoadingEmployees={isLoadingEmployees} setActiveTab={setActiveTab} employees={employees} timesheets={timesheets} isLocked={isLocked} settings={settings} />}
               {activeTab === 'employees' && <EmployeeList employees={employees} setEmployees={setEmployees} settings={settings} isLoadingEmployees={isLoadingEmployees} isLocked={isLocked} />}
               {activeTab === 'input' && <TimesheetInput 
                 employees={employees} timesheets={timesheets} onTimeChange={handleTimeChange} setTimesheets={setTimesheets} 
