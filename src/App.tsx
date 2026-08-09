@@ -329,7 +329,7 @@ function AppContent() {
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
               {activeTab === 'dashboard' && <Dashboard stats={stats} results={payrollResults} pastMetrics={pastMetrics} dbStatus={dbStatus} isLoadingEmployees={isLoadingEmployees} />}
-              {activeTab === 'employees' && <EmployeeList employees={employees} setEmployees={setEmployees} settings={settings} isLoadingEmployees={isLoadingEmployees} />}
+              {activeTab === 'employees' && <EmployeeList employees={employees} setEmployees={setEmployees} settings={settings} isLoadingEmployees={isLoadingEmployees} isLocked={isLocked} />}
               {activeTab === 'input' && <TimesheetInput 
                 employees={employees} timesheets={timesheets} onTimeChange={handleTimeChange} setTimesheets={setTimesheets} 
                 settings={settings} setAnomalies={setAnomalies} setShowAnomaliesModal={setShowAnomaliesModal} setViewLogsConfig={setViewLogsConfig} 
@@ -340,7 +340,7 @@ function AppContent() {
               {activeTab === 'history' && <HistoryTab employees={employees} settings={settings} isDemoUser={isDemoUser} />}
               {activeTab === 'import' && <ImportData employees={employees} timesheets={timesheets} settings={settings} pastData={pastData}
                 setPastData={setPastData} setEmployees={setEmployees} setSettings={setSettings} setTimesheets={setTimesheets} setActiveTab={setActiveTab} isLocked={isLocked} />}
-              {activeTab === 'settings' && <SettingsPanel settings={settings} setSettings={setSettings} setActiveTab={setActiveTab} />}
+              {activeTab === 'settings' && <SettingsPanel settings={settings} setSettings={setSettings} setActiveTab={setActiveTab} isLocked={isLocked} />}
             </motion.div>
           </AnimatePresence>
         </div>

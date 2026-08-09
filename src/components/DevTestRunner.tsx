@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp, Terminal, ShieldAlert, Cpu } from 'lucide-react';
+import { Play, CheckCircle2, XCircle, AlertTriangle, ChevronDown, ChevronUp, Terminal, ShieldAlert, Cpu, Sparkles } from 'lucide-react';
 import { Employee, Timesheet } from '../types';
 import { calculatePayroll } from '../lib/payroll-engine';
 
@@ -571,6 +571,21 @@ export default function DevTestRunner({ isOpen, onClose, customRuleToTest }: { i
               <span className="text-3xl font-extrabold text-indigo-400 mt-2">{testResults ? `${passRate}%` : '-'}</span>
             </div>
           </div>
+
+          {testResults && (
+            <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-5 mb-4">
+              <h3 className="text-indigo-400 font-bold mb-2 flex items-center gap-2">
+                <Sparkles size={18} /> Business Summary
+              </h3>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                {failedTests === 0 ? (
+                  <>The AI rule executed successfully and calculated hours and add-ons correctly on the sample data. All test scenarios passed validation.</>
+                ) : (
+                  <>The AI rule encountered issues during execution. {failedTests} out of {totalTests} scenarios failed validation. Please review the technical details below to identify the calculation errors.</>
+                )}
+              </p>
+            </div>
+          )}
 
           {/* Test Runner Action */}
           <div className="bg-indigo-950/20 border border-indigo-500/10 p-5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

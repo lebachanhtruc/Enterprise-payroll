@@ -65,15 +65,10 @@ export default function Sidebar({
             </div>
             <nav className="flex-1 px-4 space-y-1 mt-4">
                 {visibleNavItems.map((item) => {
-                    const isLocked = !companyId && item.id !== 'dashboard' && item.id !== 'settings';
                     return (
                         <button
                             key={item.id}
                             onClick={async () => {
-                                if (isLocked) {
-                                    showToast("Please select a company in '1. System Configuration' first.", "info");
-                                    return;
-                                }
                                 if (hasUnsavedChanges) {
                                     const confirmed = await showConfirm(
                                         'Discard changes?',
@@ -89,15 +84,12 @@ export default function Sidebar({
                                 "w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left whitespace-nowrap mb-1",
                                 activeTab === item.id 
                                     ? "bg-indigo-600/10 text-indigo-400 border-l-4 border-indigo-500" 
-                                    : isLocked
-                                        ? "border-l-4 border-transparent text-slate-600 opacity-60 cursor-not-allowed"
-                                        : "border-l-4 border-transparent hover:bg-white/5 hover:text-white"
+                                    : "border-l-4 border-transparent hover:bg-white/5 hover:text-white"
                             )}
                         >
                             <div className="flex items-center gap-3">
                                 <item.icon size={18} /> {item.label}
                             </div>
-                            {isLocked && <Lock size={14} className="text-slate-500" />}
                         </button>
                     );
                 })}
@@ -109,24 +101,20 @@ export default function Sidebar({
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-200 truncate" title={userEmail || 'Unknown User'}>
-                            {userEmail || 'Unknown User'}
+                            {isDemoUser ? (role === 'OWNER' ? 'Demo Owner' : role === 'MANAGER' ? 'Demo Manager' : 'Demo Staff') : (userEmail || 'Unknown User')}
                         </p>
-                        <span className={cn(
-                            "inline-block px-2 py-0.5 rounded text-[10px] font-bold tracking-wider mt-0.5",
-                            companyId 
-                                ? (role === 'OWNER' ? 'bg-indigo-500/20 text-indigo-300' : role === 'FINANCE' || role === 'MANAGER' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300') 
-                                : 'bg-rose-500/20 text-rose-300'
-                        )}>
-                            {companyId ? (role || 'USER') : 'NO WORKSPACE'}
-                        </span>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{userEmail}</p>
                     </div>
                 </div>
 
                 {isDemoUser && setRole && (
-                    <div className="mb-4 bg-slate-800/30 p-3 rounded-xl border border-indigo-500/30">
-                        <label className="block text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2">Demo Role Switcher</label>
+                    <div className="mb-4 bg-slate-800/80 p-3.5 rounded-xl border border-indigo-500/50 shadow-lg shadow-indigo-900/20 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-50 pointer-events-none"></div>
+                        <label className="block text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            <Cpu size={14} /> Role Switcher
+                        </label>
                         <select 
-                            className="w-full bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-900/80 border border-slate-600 text-slate-200 text-sm font-semibold rounded-lg px-3 py-2 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all cursor-pointer hover:border-slate-500 relative z-10"
                             value={role || 'OWNER'}
                             onChange={(e) => {
                                 setRole(e.target.value);
@@ -145,9 +133,9 @@ export default function Sidebar({
                         setIsMobileMenuOpen(false);
                         startTour('onboarding');
                     }}
-                    className="w-full mb-2 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left whitespace-nowrap text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 border border-emerald-500/20 bg-emerald-500/5 shadow-sm"
+                    className="w-full mb-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent hover:border-slate-700"
                 >
-                    <Compass size={18} /> Start Setup Guide
+                    <Compass size={16} /> Start Setup Guide
                 </button>
 
                 <button

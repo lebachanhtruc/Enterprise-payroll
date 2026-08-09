@@ -10,6 +10,7 @@ interface SettingsPanelProps {
     settings: SystemSettings;
     setSettings: React.Dispatch<React.SetStateAction<SystemSettings>>;
     setActiveTab: (tab: string) => void;
+    isLocked?: boolean;
 }
 
 export interface WorkspaceUser {
@@ -44,7 +45,7 @@ const parseRuleMetadata = (desc: string): CustomRuleMetadata => {
 
 const ROLE_PRIORITY: Record<string, number> = { 'OWNER': 3, 'MANAGER': 2, 'FINANCE': 1, 'STAFF': 0 };
 
-export default function SettingsPanel({ settings, setSettings, setActiveTab }: SettingsPanelProps) {
+export default function SettingsPanel({ settings, setSettings, setActiveTab, isLocked }: SettingsPanelProps) {
     const { user, role, session } = useAuth();
     const { showToast, showConfirm, isCompactMode, setIsCompactMode } = useUI();
     const [activeSettingsTab, setActiveSettingsTab] = useState<'general' | 'access' | 'rules'>('general');

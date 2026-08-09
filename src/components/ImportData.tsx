@@ -85,21 +85,21 @@ export default function ImportData({ employees, timesheets, settings, pastData, 
     return (
         <div className="space-y-8 animate-in fade-in">
             <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
-                <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mb-6">
-                    <FileInput size={40} />
+                <div className="bg-indigo-50 text-indigo-600 p-5 rounded-2xl mb-6 shadow-sm border border-indigo-100 flex items-center justify-center w-20 h-20">
+                    <FileInput size={32} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-3">Cycle Initialization</h3>
-                <p className="text-slate-500 mb-8 max-w-sm text-base">
-                    Upload last week json file to automatically load carry-forward balance and setup dates for the new period.
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Initialize New Cycle</h3>
+                <p className="text-slate-500 mb-8 max-w-sm text-sm text-center">
+                    Upload the JSON backup from your previous period to automatically carry forward balances and set up dates for this cycle.
                 </p>
                 <input disabled={isLocked} type="file" id="json-upload" accept=".json" className="hidden" onChange={handleImportMenu} />
-                <div className="flex flex-col gap-3 w-full max-w-md">
+                <div className="flex flex-col gap-3 w-full max-w-sm">
                     <button title={isLocked ? "Cycle locked" : "Import previous payroll JSON data to populate the current cycle"} 
                         onClick={() => !isLocked && document.getElementById('json-upload')?.click()} 
                         disabled={isLocked}
-                        className={`w-full font-bold px-6 py-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-lg shadow-sm ${isLocked ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                        className={`w-full font-bold px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm ${isLocked ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
                     >
-                        <Upload size={20} /> Load File (.json)
+                        <Upload size={18} /> Upload JSON Data
                     </button>
                     
                     
@@ -108,9 +108,9 @@ export default function ImportData({ employees, timesheets, settings, pastData, 
                     <button title={isLocked ? "Cycle locked" : "Clear all current initialized data and start fresh"} 
                         onClick={handleDeleteImport} 
                         disabled={isLocked}
-                        className={`w-full max-w-md mt-4 font-bold px-6 py-4 rounded-xl flex items-center justify-center gap-2 transition-colors ${isLocked ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
+                        className={`w-full max-w-sm mt-3 font-semibold px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all text-sm border border-transparent ${isLocked ? 'text-slate-400 cursor-not-allowed' : 'text-rose-500 hover:bg-rose-50 hover:border-rose-200'}`}
                     >
-                        <Trash2 size={20} /> Delete Previous Import
+                        <Trash2 size={16} /> Delete Imported Data
                     </button>
                 )}
             </div>

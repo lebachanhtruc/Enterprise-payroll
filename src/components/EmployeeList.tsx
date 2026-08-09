@@ -37,13 +37,15 @@ interface EmployeeListProps {
     employees: Employee[];
     setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
     settings: SystemSettings;
-    isLoadingEmployees?: boolean;
+    isLoadingEmployees: boolean;
+    isLocked?: boolean;
 }
 
-export default function EmployeeList({ employees, setEmployees, settings, isLoadingEmployees }: EmployeeListProps) {
+export default function EmployeeList({ employees, setEmployees, settings, isLoadingEmployees, isLocked }: EmployeeListProps) {
     const { showToast, showConfirm } = useUI();
     const { role } = useAuth();
-    const isFinance = role === 'FINANCE';
+    const isReadOnly = isLocked || role === 'STAFF' || role === 'FINANCE';
+    const canEdit = !isReadOnly;
     const defaultRule: Rule = { type: 'STANDARD_MAX', maxHrs: 40 };
     const [modalState, setModalState] = useState({ isOpen: false, isEditing: false, empId: null as number | null });
     const [formData, setFormData] = useState<EmployeeFormData>({ nickname: '', taxName: '', customRate: '', standardRate: '', sin: '', rule: defaultRule });
@@ -270,7 +272,7 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                             className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 text-sm transition-all bg-white shadow-sm"
                         />
                     </div>
-                    {!isFinance && (
+                    {canEdit && (
                         <button onClick={() => openModal()} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm flex items-center justify-center gap-2 transition-colors whitespace-nowrap" title="Add a new employee to the system">
                             <Plus size={18} /> Add Employee
                         </button>
@@ -312,54 +314,85 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {paginatedEmployees.map((emp: Employee) => {
-                        let ruleDetail = '';
-                        if (emp.rule.type === 'STANDARD_MAX') ruleDetail = `Max ${emp.rule.maxHrs || 0}h/week`;
-                        else if (emp.rule.type === 'GUARANTEED_MIN_HOURS') ruleDetail = `Guaranteed minimum ${emp.rule.guaranteedBaseHrs || 0}h/week`;
-                        else if (emp.rule.type === 'FIXED_TOTAL') ruleDetail = `Fixed hours ${emp.rule.fixedHrs || 0}h & $${emp.rule.fixedTip || 0} Addons`;
-                        else if (emp.rule.type === 'CHECK_PLUS_CASH') ruleDetail = `Hours ${emp.rule.fixedCheckHrs || 0}h & $${emp.rule.fixedCheckTip || 0} Addons`;
-                        else if (emp.rule.type === 'COST_ALLOCATION_OUT_FLAT') ruleDetail = `Transfer out ${emp.rule.hrsToGive || 0}h`;
-                        else if (emp.rule.type === 'COST_ALLOCATION_IN_FLAT') {
-                            const parent = employees.find((e: Employee) => e.id === Number(emp.rule.parentId || emp.rule.linkedId));
-                            ruleDetail = parent ? `Receive from ${parent.nickname}` : 'Receive from partner';
-                        }
-                        else if (emp.rule.type === 'COST_ALLOCATION_OUT_PERCENT') ruleDetail = `Keep max ${emp.rule.maxOwnHrs || 0}h hours`;
-                        else if (emp.rule.type === 'COST_ALLOCATION_IN_PERCENT') {
-                            const parent = employees.find((e: Employee) => e.id === Number(emp.rule.parentId || emp.rule.linkedId));
-                            ruleDetail = parent ? `Convert from ${parent.nickname} (${emp.rule.hrsPercent || 0}%)` : `Convert ${emp.rule.hrsPercent || 0}% hours`;
-                        }
-                        else if (emp.rule.type === 'NON_PAYROLL_CONTRACTOR') ruleDetail = `Direct payment`;
-                        else if (emp.rule.type === 'CUSTOM_LIBRARY_RULE') {
-                            const cr = customRules.find(r => r.id === emp.rule.customRuleId);
-                            ruleDetail = cr ? `Library: ${cr.name}` : 'Custom Library Rule';
-                        }
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto hide-scrollbar">
+                        <table className="w-full text-left text-sm border-collapse whitespace-nowrap">
+                            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                <tr>
+                                    <th className="px-4 py-3">Employee</th>
+                                    <th className="px-4 py-3">Rule Type</th>
+                                    <th className="px-4 py-3">Rates</th>
+                                    <th className="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {paginatedEmployees.map((emp: Employee) => {
+                                    let ruleDetail = '';
+                                    if (emp.rule.type === 'STANDARD_MAX') ruleDetail = `Max ${emp.rule.maxHrs || 0}h/w`;
+                                    else if (emp.rule.type === 'GUARANTEED_MIN_HOURS') ruleDetail = `Min ${emp.rule.guaranteedBaseHrs || 0}h/w`;
+                                    else if (emp.rule.type === 'FIXED_TOTAL') ruleDetail = `${emp.rule.fixedHrs || 0}h & $${emp.rule.fixedTip || 0}`;
+                                    else if (emp.rule.type === 'CHECK_PLUS_CASH') ruleDetail = `${emp.rule.fixedCheckHrs || 0}h & $${emp.rule.fixedCheckTip || 0}`;
+                                    else if (emp.rule.type === 'COST_ALLOCATION_OUT_FLAT') ruleDetail = `Transfer ${emp.rule.hrsToGive || 0}h`;
+                                    else if (emp.rule.type === 'COST_ALLOCATION_IN_FLAT') {
+                                        const parent = employees.find((e: Employee) => e.id === Number(emp.rule.parentId || emp.rule.linkedId));
+                                        ruleDetail = parent ? `From ${parent.nickname}` : 'From partner';
+                                    }
+                                    else if (emp.rule.type === 'COST_ALLOCATION_OUT_PERCENT') ruleDetail = `Keep ${emp.rule.maxOwnHrs || 0}h`;
+                                    else if (emp.rule.type === 'COST_ALLOCATION_IN_PERCENT') {
+                                        const parent = employees.find((e: Employee) => e.id === Number(emp.rule.parentId || emp.rule.linkedId));
+                                        ruleDetail = parent ? `${emp.rule.hrsPercent || 0}% from ${parent.nickname}` : `${emp.rule.hrsPercent || 0}%`;
+                                    }
+                                    else if (emp.rule.type === 'NON_PAYROLL_CONTRACTOR') ruleDetail = `Direct Pay`;
+                                    else if (emp.rule.type === 'CUSTOM_LIBRARY_RULE') {
+                                        const cr = customRules.find(r => r.id === emp.rule.customRuleId);
+                                        ruleDetail = cr ? `Lib: ${cr.name}` : 'Library Rule';
+                                    }
 
-                        let ruleTypeTitle = RULE_TYPES.find(r => r.id === emp.rule.type)?.title;
-                        if (emp.rule.type === 'CUSTOM_LIBRARY_RULE') ruleTypeTitle = 'Custom Rule';
+                                    let ruleTypeTitle = RULE_TYPES.find(r => r.id === emp.rule.type)?.title;
+                                    if (emp.rule.type === 'CUSTOM_LIBRARY_RULE') ruleTypeTitle = 'Custom Rule';
 
-                        return (
-                            <div key={emp.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition flex justify-between items-center cursor-pointer group" onClick={() => openModal(emp)}>
-                                <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="font-bold text-xl text-slate-800">{emp.nickname}</h3>
-                                        <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono border border-slate-200">{emp.taxName}</span>
-                                    </div>
-                                    <div className="text-sm text-slate-600 mb-3 flex items-center gap-2">
-                                        <div className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs border border-indigo-100 font-bold uppercase">{ruleTypeTitle || emp.rule.type.replace(/_/g, ' ')}</div>
-                                        {ruleDetail && <span className="font-semibold text-slate-500 text-xs">{ruleDetail}</span>}
-                                    </div>
-                                    <div className="flex space-x-4 text-sm text-slate-500">
-                                        <span className="bg-emerald-50 px-2 py-1 rounded text-emerald-700 font-mono text-xs border border-emerald-100">Custom: <strong className="font-bold ml-1">${emp.customRate}</strong></span>
-                                        <span className="bg-slate-50 px-2 py-1 rounded text-slate-700 font-mono text-xs border border-slate-100">Standard: <strong className="font-bold ml-1">${emp.standardRate}</strong></span>
-                                    </div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 group-hover:bg-slate-100 group-hover:text-indigo-500 transition-colors">
-                                    {isFinance ? <Eye size={20} /> : <Edit size={20} />}
-                                </div>
-                            </div>
-                        );
-                    })}
+                                    return (
+                                        <tr key={emp.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => openModal(emp)}>
+                                            <td className="px-4 py-2.5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                                        {emp.nickname.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-slate-800">{emp.nickname}</div>
+                                                        <div className="text-[10px] text-slate-500 font-mono">{emp.taxName}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2.5">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit border border-indigo-100">
+                                                        {ruleTypeTitle || emp.rule.type.replace(/_/g, ' ')}
+                                                    </span>
+                                                    {ruleDetail && <span className="text-[10px] text-slate-500 font-medium">{ruleDetail}</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2.5">
+                                                <div className="flex items-center gap-2 text-[10px] font-mono">
+                                                    <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                                        C: <strong className="font-bold">${emp.customRate}</strong>
+                                                    </span>
+                                                    <span className="text-slate-700 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                                                        S: <strong className="font-bold">${emp.standardRate}</strong>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2.5 text-right">
+                                                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-400 group-hover:bg-slate-200 group-hover:text-indigo-600 transition-colors">
+                                                    {!canEdit ? <Eye size={16} /> : <Edit size={16} />}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
@@ -396,24 +429,24 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                             <h3 className="text-xl font-bold">{modalState.isEditing ? 'Edit Employee' : 'Add Employee'}</h3>
                             <button onClick={() => setModalState({ isOpen: false, isEditing: false, empId: null })} className="text-slate-500 hover:text-slate-800" title="Close modal"><X size={20} /></button>
                         </div>
-                        <div className="p-6 overflow-y-auto">
-                            <form id="empForm" onSubmit={saveEmployee} className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2 sm:col-span-1"><label className="block text-sm font-bold text-slate-600 mb-2">Nickname <span className="text-rose-500">*</span></label><input disabled={isFinance} required className="w-full border-2 p-2 rounded-xl outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.nickname} onChange={e => setFormData({...formData, nickname: e.target.value})} /></div>
-                                <div className="col-span-2 sm:col-span-1"><label className="block text-sm font-bold text-slate-600 mb-2">Legal Name <span className="text-rose-500">*</span></label><input disabled={isFinance} required className="w-full border-2 p-2 rounded-xl outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.taxName} onChange={e => setFormData({...formData, taxName: e.target.value.toUpperCase()})} /></div>
-                                <div className="col-span-2 sm:col-span-1"><label className="block text-sm font-bold text-slate-600 mb-2">SIN (Optional)</label><input disabled={isFinance} className="w-full border-2 p-2 rounded-xl outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.sin} onChange={e => setFormData({...formData, sin: e.target.value})} /></div>
+                        <div className="p-4 overflow-y-auto">
+                            <form id="empForm" onSubmit={saveEmployee} className="grid grid-cols-2 gap-3 text-sm">
+                                <div className="col-span-2 sm:col-span-1"><label className="block font-bold text-slate-600 mb-1">Nickname <span className="text-rose-500">*</span></label><input disabled={isReadOnly} required className="w-full border-2 p-1.5 rounded-lg outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.nickname} onChange={e => setFormData({...formData, nickname: e.target.value})} /></div>
+                                <div className="col-span-2 sm:col-span-1"><label className="block font-bold text-slate-600 mb-1">Legal Name <span className="text-rose-500">*</span></label><input disabled={isReadOnly} required className="w-full border-2 p-1.5 rounded-lg outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.taxName} onChange={e => setFormData({...formData, taxName: e.target.value.toUpperCase()})} /></div>
+                                <div className="col-span-2 sm:col-span-1"><label className="block font-bold text-slate-600 mb-1">SIN (Optional)</label><input disabled={isReadOnly} className="w-full border-2 p-1.5 rounded-lg outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.sin} onChange={e => setFormData({...formData, sin: e.target.value})} /></div>
                                 <div className="col-span-2 sm:col-span-1 flex gap-2">
-                                    <div className="flex-1"><label className="block text-sm font-bold text-slate-600 mb-2">Custom Rate ($)</label><input disabled={isFinance} type="number" step="0.01" className="w-full border-2 p-2 rounded-xl outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.customRate} onChange={e => setFormData({...formData, customRate: e.target.value})} /></div>
-                                    <div className="flex-1"><label className="block text-sm font-bold text-slate-600 mb-2">Std Rate ($) <span className="text-rose-500">*</span></label><input disabled={isFinance} required type="number" step="0.01" className="w-full border-2 p-2 rounded-xl outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.standardRate} onChange={e => setFormData({...formData, standardRate: e.target.value})} /></div>
+                                    <div className="flex-1"><label className="block font-bold text-slate-600 mb-1">Custom Rate ($)</label><input disabled={isReadOnly} type="number" step="0.01" className="w-full border-2 p-1.5 rounded-lg outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.customRate} onChange={e => setFormData({...formData, customRate: e.target.value})} /></div>
+                                    <div className="flex-1"><label className="block font-bold text-slate-600 mb-1">Std Rate ($) <span className="text-rose-500">*</span></label><input disabled={isReadOnly} required type="number" step="0.01" className="w-full border-2 p-1.5 rounded-lg outline-none disabled:bg-slate-100 disabled:text-slate-500 focus:border-indigo-500" value={formData.standardRate} onChange={e => setFormData({...formData, standardRate: e.target.value})} /></div>
                                 </div>
-                                <div className="col-span-2 p-4 bg-slate-50 rounded-xl border border-slate-200 mt-2">
-                                    <label className="block text-sm font-bold text-indigo-600 mb-4">Rule Type <span className="text-rose-500">*</span></label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[300px] overflow-y-auto p-1">
+                                <div className="col-span-2 p-3 bg-slate-50 rounded-xl border border-slate-200 mt-1">
+                                    <label className="block font-bold text-indigo-600 mb-3">Rule Type <span className="text-rose-500">*</span></label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 max-h-[220px] overflow-y-auto p-1">
                                         {RULE_TYPES.map(r => (
-                                            <label key={r.id} className={`p-3 rounded-xl border-2 transition-all flex flex-col gap-1 ${isFinance ? 'cursor-default' : 'cursor-pointer'} ${formData.rule.type === r.id ? 'border-indigo-600 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white'}`}>
+                                            <label key={r.id} className={`p-2 rounded-lg border-2 transition-all flex flex-col gap-0.5 ${isReadOnly ? 'cursor-default' : 'cursor-pointer'} ${formData.rule.type === r.id ? 'border-indigo-600 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white'}`}>
                                                 <div className="flex items-center gap-2">
                                                     <input required type="radio" name="ruleType" 
-                                                        disabled={isFinance}
-                                                        className={`accent-indigo-600 w-4 h-4 ${isFinance ? 'cursor-default' : 'cursor-pointer'}`}
+                                                        disabled={isReadOnly}
+                                                        className={`accent-indigo-600 w-3.5 h-3.5 ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                                                         checked={formData.rule.type === r.id}
                                                         onChange={() => setFormData({
                                                             ...formData,
@@ -434,19 +467,19 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                                                             }
                                                         })}
                                                     />
-                                                    <span className={`font-bold text-sm ${formData.rule.type === r.id ? 'text-indigo-900' : 'text-slate-800'}`}>{r.title}</span>
+                                                    <span className={`font-bold text-xs ${formData.rule.type === r.id ? 'text-indigo-900' : 'text-slate-800'}`}>{r.title}</span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 pl-6 leading-tight">{r.desc}</p>
+                                                <p className="text-[10px] text-slate-500 pl-5 leading-tight">{r.desc}</p>
                                             </label>
                                         ))}
 
                                         {/* Render Custom Rules from Library */}
                                         {customRules.map(cr => (
-                                            <label key={cr.id} className={`p-3 rounded-xl border-2 transition-all flex flex-col gap-1 ${isFinance ? 'cursor-default' : 'cursor-pointer'} ${formData.rule.customRuleId === cr.id ? 'border-indigo-600 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white'}`}>
+                                            <label key={cr.id} className={`p-2 rounded-lg border-2 transition-all flex flex-col gap-0.5 ${isReadOnly ? 'cursor-default' : 'cursor-pointer'} ${formData.rule.customRuleId === cr.id ? 'border-indigo-600 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white'}`}>
                                                 <div className="flex items-center gap-2">
                                                     <input required type="radio" name="ruleType" 
-                                                        disabled={isFinance}
-                                                        className={`accent-indigo-600 w-4 h-4 ${isFinance ? 'cursor-default' : 'cursor-pointer'}`}
+                                                        disabled={isReadOnly}
+                                                        className={`accent-indigo-600 w-3.5 h-3.5 ${isReadOnly ? 'cursor-default' : 'cursor-pointer'}`}
                                                         checked={formData.rule.customRuleId === cr.id}
                                                         onChange={() => setFormData({
                                                             ...formData,
@@ -460,31 +493,31 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                                                             }
                                                         })}
                                                     />
-                                                    <span className={`font-bold text-sm ${formData.rule.customRuleId === cr.id ? 'text-indigo-900' : 'text-slate-800'}`}>Library: {cr.name}</span>
+                                                    <span className={`font-bold text-xs ${formData.rule.customRuleId === cr.id ? 'text-indigo-900' : 'text-slate-800'}`}>Library: {cr.name}</span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 pl-6 leading-tight">{cr.description || 'Custom rule from library.'}</p>
+                                                <p className="text-[10px] text-slate-500 pl-5 leading-tight">{cr.description || 'Custom rule from library.'}</p>
                                             </label>
                                         ))}
                                     </div>
 
                                     {/* Parameters based on standard rule types */}
-                                    {formData.rule.type === 'STANDARD_MAX' && <div><label className="text-sm font-bold">Max hours (h/week)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.maxHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, maxHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
-                                    {formData.rule.type === 'GUARANTEED_MIN_HOURS' && <div><label className="text-sm font-bold">Min hours (h/week)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.guaranteedBaseHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, guaranteedBaseHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
+                                    {formData.rule.type === 'STANDARD_MAX' && <div><label className="text-xs font-bold">Max hours (h/week)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.maxHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, maxHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
+                                    {formData.rule.type === 'GUARANTEED_MIN_HOURS' && <div><label className="text-xs font-bold">Min hours (h/week)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.guaranteedBaseHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, guaranteedBaseHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
                                     {formData.rule.type === 'FIXED_TOTAL' && <div className="flex gap-4">
-                                        <div className="flex-1"><label className="text-sm font-bold">Fixed hours (h)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.fixedHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
-                                        <div className="flex-1"><label className="text-sm font-bold">Fixed addons ($)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.fixedTip || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedTip: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Fixed hours (h)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.fixedHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Fixed addons ($)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.fixedTip || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedTip: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
                                     </div>}
 
                                     {formData.rule.type === 'CHECK_PLUS_CASH' && <div className="flex gap-4">
-                                        <div className="flex-1"><label className="text-sm font-bold">Check Hours (h)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.fixedCheckHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedCheckHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
-                                        <div className="flex-1"><label className="text-sm font-bold">Check Addons ($)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.fixedCheckTip || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedCheckTip: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Check Hours (h)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.fixedCheckHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedCheckHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Check Addons ($)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.fixedCheckTip || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, fixedCheckTip: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
                                     </div>}
-                                    {formData.rule.type === 'COST_ALLOCATION_OUT_FLAT' && <div><label className="text-sm font-bold">Hours to transfer (h/week)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.hrsToGive || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, hrsToGive: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
-                                    {formData.rule.type === 'COST_ALLOCATION_OUT_PERCENT' && <div><label className="text-sm font-bold">Max own hours to keep (h/week)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.maxOwnHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, maxOwnHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
+                                    {formData.rule.type === 'COST_ALLOCATION_OUT_FLAT' && <div><label className="text-xs font-bold">Hours to transfer (h/week)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.hrsToGive || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, hrsToGive: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
+                                    {formData.rule.type === 'COST_ALLOCATION_OUT_PERCENT' && <div><label className="text-xs font-bold">Max own hours to keep (h/week)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.maxOwnHrs || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, maxOwnHrs: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>}
                                     {(formData.rule.type === 'COST_ALLOCATION_IN_FLAT' || formData.rule.type === 'COST_ALLOCATION_IN_PERCENT') && (
                                         <div className="mb-2">
-                                            <label className="text-sm font-bold">Source Employee ID</label>
-                                            <select disabled={isFinance} className="w-full p-2 border rounded mt-1 disabled:bg-slate-100 focus:border-indigo-500 outline-none bg-white" value={formData.rule.parentId || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, parentId: e.target.value}})}>
+                                            <label className="text-xs font-bold">Source Employee ID</label>
+                                            <select disabled={isReadOnly} className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100 focus:border-indigo-500 outline-none bg-white" value={formData.rule.parentId || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, parentId: e.target.value}})}>
                                                 <option value="">Select Employee...</option>
                                                 {employees.filter((e: Employee) => e.id !== formData.id).map((e: Employee) => (
                                                     <option key={e.id} value={e.id}>{e.nickname} (ID: {e.id})</option>
@@ -493,20 +526,20 @@ export default function EmployeeList({ employees, setEmployees, settings, isLoad
                                         </div>
                                     )}
                                     {formData.rule.type === 'COST_ALLOCATION_IN_PERCENT' && <div className="flex gap-4">
-                                        <div className="flex-1"><label className="text-sm font-bold">Receive Hours (%)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.hrsPercent || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, hrsPercent: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
-                                        <div className="flex-1"><label className="text-sm font-bold">Receive Addons (%)</label><input disabled={isFinance} type="number" className="w-full p-2 border rounded mt-1 disabled:bg-slate-100" value={formData.rule.tipPercent || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, tipPercent: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Receive Hours (%)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.hrsPercent || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, hrsPercent: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
+                                        <div className="flex-1"><label className="text-xs font-bold">Receive Addons (%)</label><input disabled={isReadOnly} type="number" className="w-full p-1.5 border rounded-md mt-1 disabled:bg-slate-100" value={formData.rule.tipPercent || ''} onChange={e=>setFormData({...formData, rule: {...formData.rule, tipPercent: e.target.value === '' ? undefined : parseFloat(e.target.value)}})} /></div>
                                     </div>}
                                 </div>
                             </form>
                         </div>
-                        <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-2xl flex justify-between items-center">
-                            {!isFinance && modalState.isEditing ? (
-                                <button type="button" onClick={handleDeleteClick} className="text-rose-600 font-bold hover:text-rose-700 text-sm">Delete Employee</button>
+                        <div className="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl flex justify-between items-center">
+                            {canEdit && modalState.isEditing ? (
+                                <button type="button" onClick={handleDeleteClick} className="text-rose-600 font-bold hover:text-rose-700 text-sm">Delete</button>
                             ) : <div></div>}
-                            <div className="flex gap-3">
-                                <button type="button" onClick={() => setModalState({ isOpen: false, isEditing: false, empId: null })} className="px-5 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
-                                {!isFinance && (
-                                    <button type="submit" form="empForm" className="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer">
+                            <div className="flex gap-2">
+                                <button type="button" onClick={() => setModalState({ isOpen: false, isEditing: false, empId: null })} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg transition-colors text-sm">Cancel</button>
+                                {canEdit && (
+                                    <button type="submit" form="empForm" className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer text-sm">
                                         {modalState.isEditing ? 'Save Changes' : 'Add Employee'}
                                     </button>
                                 )}

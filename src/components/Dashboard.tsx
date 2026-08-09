@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon } from 'lucide-react';
+import { DollarSign, Clock, FileCheck, AlertTriangle, History, LucideIcon, Compass, Play, Users, Settings, CalendarClock } from 'lucide-react';
 import { 
   ComposedChart, 
   Bar, 
@@ -16,9 +16,11 @@ import {
 import { PayrollResult } from '../types';
 import { formatCurrency, formatNumber, cn } from '../lib/utils';
 import { Skeleton } from './ui/Skeleton';
+import { useTour } from '../contexts/TourContext';
 
 export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'checking', isLoadingEmployees }: { stats: any, results: PayrollResult[], pastMetrics?: any, dbStatus?: 'stable' | 'disconnected' | 'checking', isLoadingEmployees?: boolean }) {
     
+    const { startTour } = useTour();
     const avgGross = results.length ? results.reduce((acc, r) => acc + r.grossEarnings, 0) / results.length : 0;
 
     const chartData = results.map(r => {
@@ -90,8 +92,67 @@ export default function Dashboard({ stats, results, pastMetrics, dbStatus = 'che
         );
     }
 
+    if (results.length === 0) {
+        return (
+            <div className="space-y-6 max-w-4xl mx-auto py-10" data-tour="step-1">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900">Welcome to Lime Payroll</h2>
+                        <p className="text-slate-500 mt-1">Let's get your first payroll cycle running.</p>
+                    </div>
+                    <button onClick={() => startTour('onboarding')} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold rounded-xl transition-colors shadow-sm">
+                        <Play size={18} /> Play Interactive Guide
+                    </button>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500"></div>
+                    <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-6">
+                        <Compass size={40} />
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 mb-4">Start Your Setup Journey</h3>
+                    <p className="text-slate-500 text-lg mb-10 max-w-lg mx-auto">
+                        Your dashboard is empty because there are no timesheets or employees configured yet. Follow these three simple steps to unlock the magic of AI payroll.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left relative before:absolute before:top-1/2 before:left-10 before:right-10 before:h-0.5 before:-translate-y-1/2 before:bg-slate-100 before:hidden md:before:block before:z-0">
+                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
+                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">1</div>
+                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><Settings size={18} className="text-indigo-500" /> Company Settings</h4>
+                            <p className="text-sm text-slate-500">Set up your workspace name and standard payroll bi-weekly dates.</p>
+                        </div>
+                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
+                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">2</div>
+                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><Users size={18} className="text-sky-500" /> Add Staff & Rules</h4>
+                            <p className="text-sm text-slate-500">Add employees and assign them AI rules to dictate their pay calculations.</p>
+                        </div>
+                        <div className="bg-white border-2 border-slate-100 p-6 rounded-2xl relative z-10 hover:border-indigo-200 transition-colors shadow-sm">
+                            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4 shadow-sm border border-slate-200 font-black text-lg">3</div>
+                            <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><CalendarClock size={18} className="text-emerald-500" /> Input Timesheets</h4>
+                            <p className="text-sm text-slate-500">Log weekly hours and tips, then let the engine compile your payroll instantly.</p>
+                        </div>
+                    </div>
+
+                    <button onClick={() => startTour('onboarding')} className="mt-12 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-lg shadow-lg shadow-indigo-600/30 transition-transform hover:-translate-y-1 flex items-center gap-2 mx-auto">
+                        <Play fill="currentColor" size={20} /> Start Setup Guide Now
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-8" data-tour="step-1">
+        <div className="space-y-6" data-tour="step-1">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 className="text-xl font-bold text-slate-900">Payroll Dashboard</h2>
+                    <p className="text-sm text-slate-500">Overview of current cycle performance.</p>
+                </div>
+                <button onClick={() => startTour('onboarding')} className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-sm rounded-lg border border-slate-200 transition-colors">
+                    <Compass size={16} /> Interactive Tour
+                </button>
+            </div>
+
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card title="Total Payroll" value={formatCurrency(stats.gross)} icon={DollarSign} color="indigo" comp={grossComp} />
