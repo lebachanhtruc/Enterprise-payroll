@@ -444,7 +444,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Period Start Date</label>
                         <input 
@@ -490,8 +490,8 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
 
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-6">
                         <label className="block text-sm font-semibold text-slate-700 mb-3">Grant Access to New User</label>
-                        <div className="flex gap-4 items-end">
-                            <div className="flex-1">
+                        <div className="flex flex-col md:flex-row gap-4 items-start md:items-end w-full">
+                            <div className="flex-1 w-full">
                                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">User Email</label>
                                 <input 
                                     type="email" 
@@ -501,7 +501,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                                     className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500"
                                 />
                             </div>
-                            <div className="w-48">
+                            <div className="w-full md:w-48">
                                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Role</label>
                                 <select 
                                     value={newUserRole}
@@ -515,7 +515,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                             <button 
                                 onClick={handleGrantAccess}
                                 disabled={isGranting}
-                                className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2 h-[50px]"
+                                className="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 h-[50px]"
                             >
                                 <UserPlus size={18} /> {isGranting ? 'Granting...' : 'Grant Access'}
                             </button>
@@ -610,7 +610,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                             </div>
                             
                             <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Rule Name <span className="text-rose-500">*</span></label>
                                         <input 
@@ -636,7 +636,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
                                         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">AI Prompt</label>
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-wrap justify-end gap-2">
                                             <button 
                                                 type="button"
                                                 onClick={() => setNewRule({...newRule, ai_prompt: 'Cap at 20h/week for kitchen staff, transfer the rest to employee ID 5'})}
@@ -669,7 +669,7 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                                     />
                                 </div>
 
-                                <div className="flex justify-between items-center">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
                                     <button
                                         type="button"
                                         disabled={aiLoading}
@@ -686,15 +686,15 @@ export default function SettingsPanel({ settings, setSettings, setActiveTab }: S
                                                 : "Generate via AI"
                                         }
                                     </button>
-                                    <div className="flex items-center gap-4">
-                                        {aiError && <span className="text-xs font-semibold text-rose-500 max-w-[200px] text-right">{aiError}</span>}
-                                        <div className="flex flex-col items-end gap-1">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+                                        {aiError && <span className="text-xs font-semibold text-rose-500 w-full sm:max-w-[200px] text-left sm:text-right">{aiError}</span>}
+                                        <div className="flex flex-col items-start sm:items-end gap-1 w-full sm:w-auto">
                                             <button
                                             type="button"
                                             disabled={!newRule.evaluated_hours || aiLoading}
                                             onClick={() => setIsTestRunnerOpen(true)}
                                             title={!newRule.evaluated_hours ? "Generate a rule first" : "Test this Rule in Sandbox"}
-                                            className={`px-6 py-3 font-bold rounded-xl transition-all flex items-center gap-2 text-sm relative ${
+                                            className={`w-full sm:w-auto px-6 py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm relative ${
                                                 !newRule.evaluated_hours || aiLoading
                                                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                                                     : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-xl shadow-emerald-500/40 ring-4 ring-emerald-500/30'

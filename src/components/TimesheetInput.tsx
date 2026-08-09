@@ -136,14 +136,13 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm bg-white shadow-sm"
+              className="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-xl outline-none focus:border-indigo-500 bg-white shadow-sm text-sm"
             />
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <input type="file" multiple accept=".csv" ref={fileInputRef} className="hidden" onChange={handleCSV} />
             
-            {/* Save Changes button linked with dirty state */}
             <button 
               onClick={handleSaveClick}
               className={cn(
@@ -172,10 +171,10 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
         <table className="w-full text-left min-w-[850px] table-fixed">
           <thead>
             <tr className="bg-slate-900 text-white">
-              <th className="px-6 py-4 w-48 sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.15)]" rowSpan={2}>Employee</th>
-              <th className="px-4 py-2 text-center bg-indigo-800 border-l border-slate-700 w-36" colSpan={3}>Week 1</th>
-              <th className="px-4 py-2 text-center bg-teal-800 border-l border-slate-700 w-36" colSpan={3}>Week 2</th>
-              <th className="px-4 py-2 text-center bg-amber-700 border-l border-slate-700 w-32">Previous Debt</th>
+              <th className="px-3 md:px-6 py-3 md:py-4 w-28 md:w-48 sticky left-0 z-20 bg-slate-900 border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.15)] align-middle" rowSpan={2}>Employee</th>
+              <th className="px-4 py-2 text-center bg-indigo-800 border-l border-slate-700" colSpan={3}>Week 1</th>
+              <th className="px-4 py-2 text-center bg-teal-800 border-l border-slate-700" colSpan={3}>Week 2</th>
+              <th className="px-4 py-2 text-center bg-amber-700 border-l border-slate-700">Previous Debt</th>
             </tr>
             <tr className="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 bg-slate-900">
               <th className="px-2 py-2 text-center bg-indigo-900/50 border-l border-slate-800">Hours</th>
@@ -192,10 +191,10 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
                 <>
                     {[1, 2, 3, 4, 5].map(i => (
                       <tr key={`sk-${i}`} className="border-b border-slate-200 bg-white">
-                        <td className="px-6 py-4 border-r border-slate-200 sticky left-0 z-10 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-                            <Skeleton className="h-6 w-24" />
+                        <td className="px-3 md:px-6 py-4 border-r border-slate-200 sticky left-0 z-10 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                            <Skeleton className="h-6 w-16 md:w-24" />
                         </td>
-                        <td className="p-2 border-r border-slate-100"><Skeleton className="h-9 w-full" /></td>
+                        <td className="p-2 border-r border-slate-100"><Skeleton className="h-9 w-full min-w-[60px]" /></td>
                         <td className="p-2 border-r border-slate-100"><Skeleton className="h-9 w-full" /></td>
                         <td className="p-2 border-r border-slate-100"><Skeleton className="h-9 w-full" /></td>
                         <td className="p-2 border-r border-slate-100"><Skeleton className="h-9 w-full" /></td>
@@ -252,7 +251,7 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
                                 }
                             }}
                             className={cn(
-                                "w-full p-2 border rounded outline-none text-right font-mono focus:border-indigo-500 transition-colors", 
+                                "w-full min-w-[60px] p-2 border rounded outline-none text-right font-mono focus:border-indigo-500 transition-colors", 
                                 bg, 
                                 inputDisabled && "opacity-50 cursor-not-allowed",
                                 hasError && !inputDisabled && "border-rose-500 bg-rose-50 text-rose-700 animate-pulse focus:border-rose-600"
@@ -263,10 +262,10 @@ export default function TimesheetInput({ employees, timesheets, onTimeChange, se
 
                 return (
                   <tr key={emp.id} className="border-b border-slate-200 bg-white hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 border-r border-slate-200 sticky left-0 z-10 bg-white drop-shadow-md shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
-                      <div className="font-bold text-slate-900 text-base">{emp.nickname}</div>
+                    <td className="px-3 md:px-6 py-3 md:py-4 border-r border-slate-200 sticky left-0 z-10 bg-white drop-shadow-md shadow-[2px_0_5px_rgba(0,0,0,0.05)] align-top">
+                      <div className="font-bold text-slate-900 text-sm md:text-base truncate max-w-[80px] md:max-w-none">{emp.nickname}</div>
                       {isFixed && (
-                          <div className="mt-1 flex items-center gap-2">
+                          <div className="mt-1 flex flex-wrap items-center gap-1 md:gap-2">
                             <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded border uppercase", isUnlocked ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600')}>{isUnlocked ? 'Edit Mode' : 'Fixed'}</span>
                             <button disabled={isLocked} onClick={() => toggleUnlock(emp.id, emp.rule)} className={cn("transition-colors", isLocked ? "text-slate-300 cursor-not-allowed" : "text-slate-400 hover:text-slate-700")} title="Toggle edit lock for this employee">{isUnlocked ? <Lock size={14} /> : <Unlock size={14}/>}</button>
                           </div>

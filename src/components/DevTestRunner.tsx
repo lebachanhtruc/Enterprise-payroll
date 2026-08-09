@@ -523,8 +523,8 @@ export default function DevTestRunner({ isOpen, onClose, customRuleToTest }: { i
   const passRate = testResults ? Math.round(((passedTests + warningTests) / totalTests) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 md:p-10">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 md:p-10">
+      <div className="bg-slate-900 border border-slate-800 rounded-none sm:rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-screen sm:max-h-[90vh]">
         
         {/* Header */}
         <div className="border-b border-slate-800 bg-slate-900 px-6 py-5 flex items-center justify-between">

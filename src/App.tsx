@@ -319,7 +319,7 @@ function AppContent() {
           </div>
         )}
 
-        <div className="p-8">
+        <div className="p-4 md:p-8 w-full max-w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
               {activeTab === 'dashboard' && <Dashboard stats={stats} results={payrollResults} pastMetrics={pastMetrics} dbStatus={dbStatus} isLoadingEmployees={isLoadingEmployees} />}

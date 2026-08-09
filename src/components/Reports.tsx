@@ -260,7 +260,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                         </select>
                     )}
                 </div>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 w-full 2xl:w-auto">
                     <button title={isLocked ? "Cycle locked" : "Finalize payroll and save to history"} 
                         onClick={handleSaveClick} 
                         disabled={isSaving || isSaveDisabled || isLocked}
@@ -269,25 +269,26 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                         <Save size={18} /> {isSaving ? 'Saving...' : 'Confirm Payroll'}
                     </button>
                     
-                    <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm">
-                        <button 
-                            onClick={() => exportPayrollToCSV(results, settings, auditLogs)} 
-                            className="text-white px-4 py-2.5 font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap" 
-                            title="Export to CSV (UTF-8) for external systems"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            Export CSV
-                        </button>
-                        <button 
-                            onClick={() => exportPayrollToExcel(results, settings, auditLogs)} 
-                            className="text-emerald-100 px-3 py-2.5 font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap text-sm" 
-                            title="Export raw data to Excel"
-                        >
-                            Excel
-                        </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                        <div className="flex bg-emerald-600 rounded-xl overflow-hidden divide-x divide-emerald-500 shadow-sm w-full sm:w-auto">
+                            <button 
+                                onClick={() => exportPayrollToCSV(results, settings, auditLogs)} 
+                                className="text-white px-4 py-2.5 font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap w-full sm:w-auto" 
+                                title="Export to CSV (UTF-8) for external systems"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                Export CSV
+                            </button>
+                            <button 
+                                onClick={() => exportPayrollToExcel(results, settings, auditLogs)} 
+                                className="text-emerald-100 px-4 py-2.5 font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all whitespace-nowrap text-sm w-full sm:w-auto" 
+                                title="Export raw data to Excel"
+                            >
+                                Excel
+                            </button>
+                        </div>
+                        <button onClick={handlePrint} className="bg-slate-100 text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all whitespace-nowrap w-full sm:w-auto" title="Print the current report view"><Printer size={18} /> Print</button>
                     </div>
-
-                    <button onClick={handlePrint} className="bg-slate-100 text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-200 transition-all whitespace-nowrap" title="Print the current report view"><Printer size={18} /> Print</button>
                 </div>
             </div>
 
@@ -319,7 +320,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
 
             <div className="grid grid-cols-1 gap-8">
                 {reportType === 'CHECK' && (reportView === 'BOTH' || reportView === 'W1') && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
+                    <div className="bg-white p-4 md:p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
                         <ReportHeader title="STANDARD PAYROLL REPORT - WEEK 1" subtitle="Standard Hours & Addons (Week 1)" settings={settings} color="indigo" week={1} />
                         {renderTableBody(results.filter(r => r.checkHrsWk > 0 || r.standardAddOnsWk > 0), [
                             { label: 'Hours', right: true, render: r => formatNumber(r.checkHrsWk) },
@@ -329,7 +330,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                     </div>
                 )}
                 {reportType === 'CHECK' && (reportView === 'BOTH' || reportView === 'W2') && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
+                    <div className="bg-white p-4 md:p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
                         <ReportHeader title="STANDARD PAYROLL REPORT - WEEK 2" subtitle="Standard Hours & Addons (Week 2)" settings={settings} color="indigo" week={2} />
                         {renderTableBody(results.filter(r => r.checkHrsWk > 0 || r.standardAddOnsWk > 0), [
                             { label: 'Hours', right: true, render: r => formatNumber(r.checkHrsWk) },
@@ -339,7 +340,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                     </div>
                 )}
                 {reportType === 'CASH_TIP' && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
+                    <div className="bg-white p-4 md:p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
                         <ReportHeader title="EXPENSE REIMBURSEMENT & ADDONS REPORT" subtitle="Other Addons (2-Week Total)" settings={settings} color="emerald" />
                         {renderTableBody(results.filter(r => r.tipCash2Wk > 0), [
                             { label: 'Total Addons', right: true, render: r => <span className="text-indigo-600">{formatCurrency(r.tipCash2Wk)}</span> }
@@ -348,7 +349,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                     </div>
                 )}
                 {reportType === 'CASH_SALARY' && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
+                    <div className="bg-white p-4 md:p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
                         <ReportHeader title="PRODUCTIVITY BONUS REPORT" subtitle="Performance & Productivity Fund (2-Week Total)" settings={settings} color="amber" />
                         {renderTableBody(results.filter(r => r.variableBonus > 0), [
                             { label: 'Recorded Volume', right: true, render: r => formatNumber(r.adjustedHrs) },
@@ -358,7 +359,7 @@ export default function Reports({ results, settings, employees, timesheets, isLo
                     </div>
                 )}
                 {reportType === 'SHORTFALL' && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
+                    <div className="bg-white p-4 md:p-10 rounded-xl shadow-sm border border-slate-200 print:shadow-none print:border-none print:p-0 page-break">
                         {results.some(r => r.carryForwardBalance > 0) && (
                             <div className="bg-rose-50 border-l-4 border-rose-600 p-6 mb-10 rounded-r-lg print-block print-hidden">
                                 <h3 className="text-rose-800 font-black mb-1">SYSTEM NOTICE</h3>
